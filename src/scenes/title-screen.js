@@ -126,17 +126,7 @@ export class TitleScreen {
       handler();
     }
 
-    const menu = document.createElement('div');
-    menu.className = 'title-screen__menu';
-
-    menu.append(
-      this.#createButton('New Game', this.onNew),
-      this.#createDisabledButton('Continue'),
-      this.#createDisabledButton('Load Game'),
-    );
-
-    container.append(image, menu);
-    return container;
+    return;
   }
 
   #createButton(label, handler) {
