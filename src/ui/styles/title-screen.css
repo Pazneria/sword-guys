@@ -6,9 +6,72 @@
 }
 
 .title-screen__image {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   max-height: 100%;
   height: auto;
   image-rendering: pixelated;
+  filter: saturate(1.2) contrast(1.05) brightness(0.9);
+}
+
+.title-screen__menu {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.title-screen__menu-item {
+  margin: 0;
+}
+
+.title-screen__menu-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2.5rem;
+  border: 0.2rem solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(8, 6, 32, 0.75);
+  color: inherit;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  letter-spacing: 0.25rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.title-screen__menu-option:hover,
+.title-screen__menu-option:focus-visible {
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 1.5rem rgba(255, 215, 64, 0.4);
+  outline: none;
+}
+
+.title-screen__menu-option--active {
+  animation: title-screen-menu-flash 1.2s steps(2, end) infinite;
+  border-color: rgba(255, 225, 125, 0.9);
+  box-shadow: 0 0 1.75rem rgba(255, 220, 90, 0.55);
+}
+
+.title-screen__menu-option--pressed {
+  transform: scale(0.97);
+}
+
+@keyframes title-screen-menu-flash {
+  0%,
+  100% {
+    color: #fff7c7;
+    text-shadow: 0 0 0.3rem rgba(255, 215, 64, 0.9), 0 0 1.2rem rgba(255, 145, 0, 0.6);
+  }
+
+  50% {
+    color: #ffe047;
+    text-shadow: 0 0 0.6rem rgba(255, 215, 64, 0.95), 0 0 1.9rem rgba(255, 140, 0, 0.75);
+  }
 }
