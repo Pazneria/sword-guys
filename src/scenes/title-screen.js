@@ -1,31 +1,23 @@
 export class TitleScreen {
-  constructor(
-    root,
-    { onContinue = undefined, onNew = undefined, onLoad = undefined } = {}
-  ) {
+  constructor(root, { onNew, onContinue, onLoad } = {}) {
     this.root = root;
-    this.handlers = { onContinue, onNew, onLoad };
-    this.focusIndex = 0;
-    this.buttons = [];
-    this.#boundHandleKeyDown = this.#handleKeyDown.bind(this);
+    this.onNew = onNew;
+    this.onContinue = onContinue;
+    this.onLoad = onLoad;
+    this.container = null;
   }
 
   mount() {
-    this.view = this.#createView();
-    this.root.replaceChildren(this.view);
-    window.addEventListener('keydown', this.#boundHandleKeyDown);
-    this.#updateFocus(0);
+    this.container = this.#createView();
+    this.root.replaceChildren(this.container);
   }
 
   unmount() {
-    window.removeEventListener('keydown', this.#boundHandleKeyDown);
-    this.buttons = [];
-
-    if (this.view && this.view.isConnected) {
-      this.view.remove();
+    if (this.container?.isConnected) {
+      this.container.remove();
     }
 
-    this.view = undefined;
+    this.container = null;
   }
 
   #createView() {
@@ -134,8 +126,36 @@ export class TitleScreen {
       handler();
     }
 
-    window.requestAnimationFrame(() => {
-      button.classList.remove('title-screen__menu-option--pressed');
-    });
+    const menu = document.createElement('div');
+    menu.className = 'title-screen__menu';
+
+    menu.append(
+      this.#createButton('New Game', this.onNew),
+      this.#createDisabledButton('Continue'),
+      this.#createDisabledButton('Load Game'),
+    );
+
+    container.append(image, menu);
+    return container;
+  }
+
+  #createButton(label, handler) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'title-screen__button';
+    button.textContent = label;
+
+    if (typeof handler === 'function') {
+      button.addEventListener('click', handler);
+    }
+
+    return button;
+  }
+
+  #createDisabledButton(label) {
+    const button = this.#createButton(label, null);
+    button.disabled = true;
+    button.title = 'Coming soon';
+    return button;
   }
 }
