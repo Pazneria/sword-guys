@@ -34,9 +34,9 @@ export class TitleScreen {
     menu.className = 'title-screen__menu';
 
     const options = [
-      { label: 'Continue', handler: this.handlers.onContinue },
-      { label: 'New', handler: this.handlers.onNew },
-      { label: 'Load', handler: this.handlers.onLoad },
+      { label: 'Continue', handler: this.onContinue },
+      { label: 'New', handler: this.onNew },
+      { label: 'Load', handler: this.onLoad },
     ];
 
     this.buttons = [];
