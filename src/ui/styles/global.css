@@ -1,0 +1,49 @@
+:root {
+  color-scheme: dark;
+  font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+  background-color: #220c51;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 20%, #f77a32 0%, #d94b6a 25%, #7f2a8e 55%, #2a0a57 100%);
+  color: #fbd27b;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.05));
+  pointer-events: none;
+  z-index: 0;
+}
+
+#game-root {
+  position: relative;
+  z-index: 1;
+  width: min(90vw, 960px);
+  aspect-ratio: 4 / 3;
+  border: 16px solid #341c75;
+  box-shadow: 0 0 0 4px #fbd27b, 0 0 40px rgba(0, 0, 0, 0.6);
+  background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.4) 2px,
+      transparent 2px,
+      transparent 4px
+    ),
+    linear-gradient(180deg, #401f7a 0%, #2e1558 100%);
+  image-rendering: pixelated;
+  overflow: hidden;
+}
