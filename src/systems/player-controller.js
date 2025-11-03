@@ -3,7 +3,20 @@ const DIRECTIONS = Object.freeze({
   down: { x: 0, y: 1, keys: ['ArrowDown', 's', 'S'] },
   left: { x: -1, y: 0, keys: ['ArrowLeft', 'a', 'A'] },
   right: { x: 1, y: 0, keys: ['ArrowRight', 'd', 'D'] },
+  upRight: { x: 1, y: -1, keys: [] },
+  upLeft: { x: -1, y: -1, keys: [] },
+  downRight: { x: 1, y: 1, keys: [] },
+  downLeft: { x: -1, y: 1, keys: [] },
 });
+
+const DIAGONAL_COMPONENTS = Object.freeze({
+  upRight: ['up', 'right'],
+  upLeft: ['up', 'left'],
+  downRight: ['down', 'right'],
+  downLeft: ['down', 'left'],
+});
+
+const COMBO_SEPARATOR = '+';
 
 const DEFAULT_SPEED_TILES_PER_SECOND = 6;
 
@@ -36,6 +49,20 @@ const buildKeyDirectionMap = () => {
   Object.entries(DIRECTIONS).forEach(([name, value]) => {
     value.keys.forEach((key) => {
       entries.push([key, name]);
+    });
+  });
+
+  Object.entries(DIAGONAL_COMPONENTS).forEach(([name, [first, second]]) => {
+    const firstKeys = DIRECTIONS[first]?.keys ?? [];
+    const secondKeys = DIRECTIONS[second]?.keys ?? [];
+
+    firstKeys.forEach((primary) => {
+      secondKeys.forEach((secondary) => {
+        entries.push([`${primary}${COMBO_SEPARATOR}${secondary}`, name]);
+        if (primary !== secondary) {
+          entries.push([`${secondary}${COMBO_SEPARATOR}${primary}`, name]);
+        }
+      });
     });
   });
 
@@ -165,8 +192,9 @@ export class PlayerController {
       this.callbacks.onStep?.({ ...this.tilePosition }, completedMove.direction);
       this.callbacks.onMoveComplete?.({ ...this.tilePosition }, completedMove.direction);
 
-      if (this.#pressedDirections.has(completedMove.direction)) {
-        this.#directionQueue.push(completedMove.direction);
+      const activeDirection = this.#resolveActiveDirection();
+      if (activeDirection) {
+        this.#enqueueDirection(activeDirection);
       }
 
       this.#processQueue();
@@ -197,7 +225,7 @@ export class PlayerController {
 
     event.preventDefault();
     this.#pressedDirections.add(direction);
-    this.#directionQueue.push(direction);
+    this.#queueDirectionFromPressed();
     this.#processQueue();
   };
 
@@ -209,12 +237,14 @@ export class PlayerController {
 
     event.preventDefault();
     this.#pressedDirections.delete(direction);
+    this.#queueDirectionFromPressed();
+    this.#processQueue();
   };
 
   #processQueue() {
     while (!this.#currentMove && this.#directionQueue.length > 0) {
       const nextDirection = this.#directionQueue.shift();
-      if (!this.#pressedDirections.has(nextDirection)) {
+      if (!this.#isDirectionPressed(nextDirection)) {
         continue;
       }
 
@@ -224,27 +254,93 @@ export class PlayerController {
     }
   }
 
+  #queueDirectionFromPressed() {
+    const nextDirection = this.#resolveActiveDirection();
+    if (!nextDirection) {
+      return false;
+    }
+
+    return this.#enqueueDirection(nextDirection);
+  }
+
+  #enqueueDirection(directionName) {
+    if (!directionName) {
+      return false;
+    }
+
+    if (
+      this.#currentMove?.direction === directionName &&
+      this.#directionQueue.length === 0
+    ) {
+      return false;
+    }
+
+    const lastQueued = this.#directionQueue[this.#directionQueue.length - 1];
+    if (lastQueued === directionName) {
+      return false;
+    }
+
+    this.#directionQueue.push(directionName);
+    return true;
+  }
+
+  #resolveActiveDirection() {
+    for (const [diagonal] of Object.entries(DIAGONAL_COMPONENTS)) {
+      if (this.#isDirectionPressed(diagonal)) {
+        return diagonal;
+      }
+    }
+
+    for (const direction of this.#pressedDirections) {
+      if (DIRECTIONS[direction]) {
+        return direction;
+      }
+    }
+
+    return null;
+  }
+
+  #isDirectionPressed(directionName) {
+    if (!directionName) {
+      return false;
+    }
+
+    if (this.#pressedDirections.has(directionName)) {
+      return true;
+    }
+
+    const components = DIAGONAL_COMPONENTS[directionName];
+    if (!components) {
+      return false;
+    }
+
+    return components.every((component) => this.#pressedDirections.has(component));
+  }
+
   #startMove(directionName) {
     const direction = DIRECTIONS[directionName];
     if (!direction) {
       return false;
     }
 
+    const from = { ...this.tilePosition };
     const targetTile = {
-      x: this.tilePosition.x + direction.x,
-      y: this.tilePosition.y + direction.y,
+      x: from.x + direction.x,
+      y: from.y + direction.y,
     };
 
-    if (this.canMoveTo && !this.canMoveTo(targetTile, directionName)) {
+    if (this.canMoveTo && !this.canMoveTo(targetTile, directionName, from)) {
       return false;
     }
 
+    const distance = Math.hypot(direction.x, direction.y) || 1;
+
     this.#currentMove = {
       direction: directionName,
-      from: { ...this.tilePosition },
+      from,
       to: targetTile,
       elapsed: 0,
-      duration: this.moveDuration,
+      duration: this.moveDuration * distance,
     };
 
     const moveSnapshot = {
