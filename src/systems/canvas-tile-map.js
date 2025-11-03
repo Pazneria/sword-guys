@@ -37,6 +37,7 @@ export class CanvasTileMap {
     viewport = { columns: 20, rows: 12 },
     drawTile,
     backgroundColor = '#0f061b',
+    followSmoothing = 0,
   }) {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
@@ -45,6 +46,7 @@ export class CanvasTileMap {
     this.viewportTiles = viewport;
     this.drawTile = typeof drawTile === 'function' ? drawTile : null;
     this.backgroundColor = backgroundColor;
+    this.followSmoothing = Math.min(Math.max(followSmoothing, 0), 1);
 
     this.mapHeight = this.layout.length;
     this.mapWidth = this.layout[0]?.length ?? 0;
@@ -55,6 +57,7 @@ export class CanvasTileMap {
     this.camera = { x: this.viewportTiles.columns / 2, y: this.viewportTiles.rows / 2 };
     this.cameraTarget = null;
     this.playerPosition = null;
+    this.hasCameraPosition = false;
 
     this.scale = 1;
     this.offsetX = 0;
@@ -70,7 +73,7 @@ export class CanvasTileMap {
     window.removeEventListener('resize', this.#handleResize);
   }
 
-  setCameraTarget(tilePosition) {
+  setCameraTarget(tilePosition, { redraw = true } = {}) {
     if (!tilePosition) {
       return;
     }
@@ -81,13 +84,17 @@ export class CanvasTileMap {
     };
 
     this.#updateCamera();
-    this.draw();
+    if (redraw) {
+      this.draw();
+    }
   }
 
-  setPlayerPosition(tilePosition) {
+  setPlayerPosition(tilePosition, { redraw = true } = {}) {
     if (!tilePosition) {
       this.playerPosition = null;
-      this.draw();
+      if (redraw) {
+        this.draw();
+      }
       return;
     }
 
@@ -99,7 +106,9 @@ export class CanvasTileMap {
       y: hasIntegerCoordinates ? tilePosition.y + 0.5 : tilePosition.y,
     };
 
-    this.draw();
+    if (redraw) {
+      this.draw();
+    }
   }
 
   draw() {
@@ -191,6 +200,7 @@ export class CanvasTileMap {
     if (!this.cameraTarget) {
       this.camera.x = halfWidth;
       this.camera.y = halfHeight;
+      this.hasCameraPosition = true;
       return;
     }
 
@@ -202,7 +212,27 @@ export class CanvasTileMap {
     const maxX = Math.max(halfWidth, this.mapWidth - halfWidth);
     const maxY = Math.max(halfHeight, this.mapHeight - halfHeight);
 
-    this.camera.x = clamp(centerX, minX, maxX);
-    this.camera.y = clamp(centerY, minY, maxY);
+    const clampedTargetX = clamp(centerX, minX, maxX);
+    const clampedTargetY = clamp(centerY, minY, maxY);
+
+    if (!this.hasCameraPosition) {
+      this.camera.x = clampedTargetX;
+      this.camera.y = clampedTargetY;
+      this.hasCameraPosition = true;
+      return;
+    }
+
+    if (this.followSmoothing > 0) {
+      const smoothing = this.followSmoothing;
+      const easedX = this.camera.x + (clampedTargetX - this.camera.x) * smoothing;
+      const easedY = this.camera.y + (clampedTargetY - this.camera.y) * smoothing;
+
+      this.camera.x = clamp(easedX, minX, maxX);
+      this.camera.y = clamp(easedY, minY, maxY);
+      return;
+    }
+
+    this.camera.x = clampedTargetX;
+    this.camera.y = clampedTargetY;
   }
 }

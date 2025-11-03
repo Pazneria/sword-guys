@@ -3,6 +3,29 @@ import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
 
 export class StartingAreaScene {
+  #handleControllerInterpolate = (event) => {
+    const position = event?.detail?.position;
+    if (!position || !this.map) {
+      return;
+    }
+
+    if (this.followDuringInterpolation) {
+      this.map.setCameraTarget(position, { redraw: false });
+    }
+
+    this.map.setPlayerPosition(position);
+  };
+
+  #handleControllerTileEnter = (event) => {
+    const tile = event?.detail?.tile;
+    if (!tile || !this.map) {
+      return;
+    }
+
+    const redraw = !this.followDuringInterpolation;
+    this.map.setCameraTarget(tile, { redraw });
+  };
+
   constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
     this.root = root;
     this.config = config;
@@ -18,6 +41,7 @@ export class StartingAreaScene {
 
     const canvas = this.container.querySelector('.starting-area__canvas');
     this.map = this.#createMap(canvas);
+    this.followDuringInterpolation = this.map.followSmoothing > 0;
     this.map.setCameraTarget(this.config.spawn);
     this.map.setPlayerPosition(this.config.spawn);
     this.map.start();
@@ -42,6 +66,7 @@ export class StartingAreaScene {
     }
 
     this.container = null;
+    this.followDuringInterpolation = false;
   }
 
   getSpawnPoint() {
@@ -128,6 +153,7 @@ export class StartingAreaScene {
       tileSize,
       drawTile,
       backgroundColor: '#120721',
+      followSmoothing: 0.2,
     });
   }
 
