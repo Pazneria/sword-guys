@@ -7,6 +7,12 @@ const TILES = Object.freeze({
   SPAWN: 'spawn',
 });
 
+const PASSABLE_TILES = Object.freeze({
+  [TILES.GRASS]: true,
+  [TILES.PATH]: true,
+  [TILES.SPAWN]: true,
+});
+
 const STARTING_AREA_WIDTH = 64;
 const STARTING_AREA_HEIGHT = 40;
 
@@ -118,4 +124,5 @@ export const STARTING_AREA_CONFIG = Object.freeze({
   layout,
   spawn,
   tiles: TILES,
+  passableTiles: PASSABLE_TILES,
 });
