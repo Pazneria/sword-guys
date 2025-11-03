@@ -1,5 +1,6 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
+import { PlayerController } from '../systems/player-controller.js';
 
 export class StartingAreaScene {
   constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
@@ -8,6 +9,7 @@ export class StartingAreaScene {
     this.onExit = onExit;
     this.container = null;
     this.map = null;
+    this.playerController = null;
   }
 
   mount() {
@@ -19,9 +21,17 @@ export class StartingAreaScene {
     this.map.setCameraTarget(this.config.spawn);
     this.map.setPlayerPosition(this.config.spawn);
     this.map.start();
+
+    this.playerController = this.#createPlayerController();
+    this.playerController.start();
   }
 
   unmount() {
+    if (this.playerController) {
+      this.playerController.stop();
+      this.playerController = null;
+    }
+
     if (this.map) {
       this.map.destroy();
       this.map = null;
@@ -118,6 +128,42 @@ export class StartingAreaScene {
       tileSize,
       drawTile,
       backgroundColor: '#120721',
+    });
+  }
+
+  #createPlayerController() {
+    const movementSpeed = 6; // tiles per second
+    const blockedTiles = new Set([
+      this.config.tiles.TREE,
+      this.config.tiles.WATER,
+      this.config.tiles.ROCK,
+    ]);
+
+    const canMoveTo = ({ x, y }) => {
+      const row = this.config.layout[y];
+      if (!row) {
+        return false;
+      }
+
+      const tile = row[x];
+      if (!tile) {
+        return false;
+      }
+
+      return !blockedTiles.has(tile);
+    };
+
+    return new PlayerController({
+      position: this.config.spawn,
+      speed: movementSpeed,
+      canMoveTo,
+      onPositionChange: (position) => {
+        this.map?.setPlayerPosition({ ...position });
+      },
+      onStep: (tilePosition) => {
+        this.map?.setPlayerPosition({ ...tilePosition });
+        this.map?.setCameraTarget({ ...tilePosition });
+      },
     });
   }
 
