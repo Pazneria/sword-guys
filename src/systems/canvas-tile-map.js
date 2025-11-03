@@ -98,12 +98,12 @@ export class CanvasTileMap {
       return;
     }
 
-    const hasIntegerCoordinates =
-      Number.isInteger(tilePosition.x) && Number.isInteger(tilePosition.y);
+    const offsetCoordinate = (value) =>
+      typeof value === 'number' && Number.isFinite(value) ? value + 0.5 : value;
 
     this.playerPosition = {
-      x: hasIntegerCoordinates ? tilePosition.x + 0.5 : tilePosition.x,
-      y: hasIntegerCoordinates ? tilePosition.y + 0.5 : tilePosition.y,
+      x: offsetCoordinate(tilePosition.x),
+      y: offsetCoordinate(tilePosition.y),
     };
 
     if (redraw) {
