@@ -1,167 +1,442 @@
-import { STARTER_ITEMS, getStarterInventory } from '../data/items.js';
+const cloneValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneValue(entry));
+  }
 
-const DEFAULT_CATEGORY = 'Miscellaneous';
+  if (value && typeof value === 'object') {
+    return { ...value };
+  }
 
-export class GameState {
-  constructor({ itemsCatalog = STARTER_ITEMS, starterInventory = null } = {}) {
-    this.itemsCatalog = [...itemsCatalog];
-    this.itemsById = new Map(itemsCatalog.map((item) => [item.id, item]));
+  return value;
+};
 
-    this.categoryOrder = [];
-    const seenCategories = new Set();
-    for (const item of this.itemsCatalog) {
-      const category = item.category ?? DEFAULT_CATEGORY;
-      if (!seenCategories.has(category)) {
-        seenCategories.add(category);
-        this.categoryOrder.push(category);
-      }
+const createDefaultStats = () => ({
+  health: 100,
+  maxHealth: 100,
+  mana: 50,
+  maxMana: 50,
+  strength: 10,
+  agility: 10,
+  intelligence: 10,
+  defense: 5,
+  level: 1,
+  experience: 0,
+});
+
+const createDefaultEquipment = () => ({
+  weapon: null,
+  armor: null,
+  accessory: null,
+});
+
+const createDefaultSettings = () => ({
+  volume: 0.7,
+  difficulty: 'normal',
+  showSubtitles: true,
+  language: 'en',
+});
+
+const createDefaultSaveMetadata = () => ({
+  slot: 1,
+  lastSavedAt: null,
+  lastLocation: null,
+  playTime: 0,
+});
+
+class ObservableState {
+  constructor() {
+    this._listeners = new Map();
+  }
+
+  subscribe(event, listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('listener must be a function');
     }
 
-    this.inventory = new Map();
-    this.inventoryListeners = new Set();
+    if (!this._listeners.has(event)) {
+      this._listeners.set(event, new Set());
+    }
 
-    const initialInventory =
-      starterInventory ?? getStarterInventory();
+    const listeners = this._listeners.get(event);
+    listeners.add(listener);
 
-    for (const entry of initialInventory) {
-      const definition = this.itemsById.get(entry.id);
-      if (!definition || !Number.isFinite(entry.quantity) || entry.quantity <= 0) {
-        continue;
-      }
+    return () => this.unsubscribe(event, listener);
+  }
 
-      this.inventory.set(entry.id, Math.floor(entry.quantity));
+  unsubscribe(event, listener) {
+    const listeners = this._listeners.get(event);
+    if (!listeners) {
+      return;
+    }
+
+    listeners.delete(listener);
+
+    if (listeners.size === 0) {
+      this._listeners.delete(event);
     }
   }
 
-  addInventoryListener(listener) {
-    if (typeof listener !== 'function') {
-      return () => {};
+  _emit(event, payload) {
+    const listeners = this._listeners.get(event);
+    if (!listeners || listeners.size === 0) {
+      return;
     }
 
-    this.inventoryListeners.add(listener);
-    listener(this.getInventorySnapshot());
+    [...listeners].forEach((listener) => {
+      listener(payload);
+    });
+  }
+}
 
-    return () => {
-      this.inventoryListeners.delete(listener);
+export class PlayerState extends ObservableState {
+  constructor(initialState = {}) {
+    super();
+
+    this.inventory = [];
+    this.stats = createDefaultStats();
+    this.equipment = createDefaultEquipment();
+    this.skills = new Set();
+    this.saveMetadata = createDefaultSaveMetadata();
+    this.settings = createDefaultSettings();
+
+    if (initialState) {
+      this.reset({ initialState, emit: false });
+    }
+  }
+
+  #emitChange(type, detail) {
+    const payload = {
+      type,
+      detail,
+      snapshot: this.getSnapshot(),
+    };
+
+    this._emit(type, detail);
+    this._emit('change', payload);
+  }
+
+  reset({ emit = true, initialState = null } = {}) {
+    const state = initialState ?? {};
+
+    const stats = state.stats ?? {};
+    const inventory = state.inventory ?? [];
+    const equipment = state.equipment ?? {};
+    const skills = state.skills ?? [];
+    const saveMetadata = state.saveMetadata ?? {};
+    const settings = state.settings ?? {};
+
+    this.inventory = inventory.map((item) => cloneValue(item));
+    this.stats = { ...createDefaultStats(), ...stats };
+    this.equipment = { ...createDefaultEquipment(), ...equipment };
+    this.skills = new Set(Array.isArray(skills) ? skills : []);
+    this.saveMetadata = {
+      ...createDefaultSaveMetadata(),
+      ...saveMetadata,
+      lastLocation: saveMetadata.lastLocation ? { ...saveMetadata.lastLocation } : null,
+    };
+    this.settings = { ...createDefaultSettings(), ...settings };
+
+    if (emit) {
+      this.#emitChange('reset', { snapshot: this.getSnapshot() });
+    }
+  }
+
+  getSnapshot() {
+    return {
+      inventory: this.inventory.map((item) => cloneValue(item)),
+      stats: { ...this.stats },
+      equipment: { ...this.equipment },
+      skills: [...this.skills],
+      saveMetadata: {
+        ...this.saveMetadata,
+        lastLocation: this.saveMetadata.lastLocation
+          ? { ...this.saveMetadata.lastLocation }
+          : null,
+      },
+      settings: { ...this.settings },
     };
   }
 
-  addItem(itemId, quantity = 1) {
-    const definition = this.itemsById.get(itemId);
-    if (!definition) {
-      throw new Error(`Unknown item: ${itemId}`);
-    }
-
-    if (!Number.isFinite(quantity) || quantity <= 0) {
-      return this.getItemQuantity(itemId);
-    }
-
-    const current = this.inventory.get(itemId) ?? 0;
-    const nextQuantity = current + Math.floor(quantity);
-    this.inventory.set(itemId, nextQuantity);
-    this.#emitInventoryChange();
-    return nextQuantity;
+  getStats() {
+    return { ...this.stats };
   }
 
-  useItem(itemId, quantity = 1) {
-    const definition = this.itemsById.get(itemId);
-    if (!definition) {
-      throw new Error(`Unknown item: ${itemId}`);
+  getInventory() {
+    return this.inventory.map((item) => cloneValue(item));
+  }
+
+  getEquipment() {
+    return { ...this.equipment };
+  }
+
+  getSkills() {
+    return [...this.skills];
+  }
+
+  getSettings() {
+    return { ...this.settings };
+  }
+
+  getSaveMetadata() {
+    return {
+      ...this.saveMetadata,
+      lastLocation: this.saveMetadata.lastLocation
+        ? { ...this.saveMetadata.lastLocation }
+        : null,
+    };
+  }
+
+  getLastKnownLocation() {
+    const location = this.saveMetadata.lastLocation;
+    return location ? { ...location } : null;
+  }
+
+  updateStats(partialStats = {}) {
+    if (!partialStats || typeof partialStats !== 'object') {
+      return this.getStats();
     }
 
-    if (!Number.isFinite(quantity) || quantity <= 0) {
+    this.stats = { ...this.stats, ...partialStats };
+    const detail = {
+      stats: this.getStats(),
+      partial: { ...partialStats },
+    };
+
+    this.#emitChange('stats', detail);
+    return detail.stats;
+  }
+
+  addItem(item) {
+    const entry = cloneValue(item);
+    this.inventory.push(entry);
+
+    const detail = {
+      added: cloneValue(entry),
+      inventory: this.getInventory(),
+    };
+
+    this.#emitChange('inventory', detail);
+    return detail.inventory;
+  }
+
+  removeItem(predicateOrItem) {
+    if (predicateOrItem == null) {
+      return null;
+    }
+
+    const predicate =
+      typeof predicateOrItem === 'function'
+        ? predicateOrItem
+        : (entry) => entry === predicateOrItem;
+
+    const index = this.inventory.findIndex(predicate);
+    if (index === -1) {
+      return null;
+    }
+
+    const [removed] = this.inventory.splice(index, 1);
+    const detail = {
+      removed: cloneValue(removed),
+      inventory: this.getInventory(),
+    };
+
+    this.#emitChange('inventory', detail);
+    return removed;
+  }
+
+  equipItem(slot, item) {
+    if (typeof slot !== 'string' || slot.length === 0) {
+      throw new TypeError('slot must be a non-empty string');
+    }
+
+    const value = item == null ? null : cloneValue(item);
+    this.equipment[slot] = value;
+
+    const detail = {
+      slot,
+      item: value == null ? null : cloneValue(value),
+      equipment: this.getEquipment(),
+    };
+
+    this.#emitChange('equipment', detail);
+    return detail.equipment;
+  }
+
+  unequipItem(slot) {
+    if (typeof slot !== 'string' || slot.length === 0) {
+      throw new TypeError('slot must be a non-empty string');
+    }
+
+    if (!(slot in this.equipment)) {
+      return null;
+    }
+
+    const removed = this.equipment[slot];
+    this.equipment[slot] = null;
+
+    const detail = {
+      slot,
+      item: null,
+      removed: removed == null ? null : cloneValue(removed),
+      equipment: this.getEquipment(),
+    };
+
+    this.#emitChange('equipment', detail);
+    return removed;
+  }
+
+  learnSkill(skill) {
+    if (!skill) {
       return false;
     }
 
-    const current = this.inventory.get(itemId) ?? 0;
-    if (current <= 0) {
+    if (this.skills.has(skill)) {
       return false;
     }
 
-    const nextQuantity = Math.max(0, current - Math.floor(quantity));
-    if (nextQuantity > 0) {
-      this.inventory.set(itemId, nextQuantity);
-    } else {
-      this.inventory.delete(itemId);
-    }
+    this.skills.add(skill);
 
-    this.#emitInventoryChange();
+    const detail = {
+      skill,
+      skills: this.getSkills(),
+    };
+
+    this.#emitChange('skills', detail);
     return true;
   }
 
-  getItemDefinition(itemId) {
-    return this.itemsById.get(itemId) ?? null;
-  }
-
-  getItemQuantity(itemId) {
-    return this.inventory.get(itemId) ?? 0;
-  }
-
-  getInventorySnapshot() {
-    const snapshot = { categories: [] };
-    const categories = snapshot.categories;
-    const categoryMap = new Map();
-
-    for (const categoryName of this.categoryOrder) {
-      categoryMap.set(categoryName, []);
+  forgetSkill(skill) {
+    if (!skill || !this.skills.has(skill)) {
+      return false;
     }
 
-    for (const item of this.itemsCatalog) {
-      const quantity = this.inventory.get(item.id) ?? 0;
-      if (quantity <= 0) {
-        continue;
-      }
+    this.skills.delete(skill);
 
-      const category = item.category ?? DEFAULT_CATEGORY;
-      if (!categoryMap.has(category)) {
-        categoryMap.set(category, []);
-        this.categoryOrder.push(category);
-      }
+    const detail = {
+      skill,
+      skills: this.getSkills(),
+    };
 
-      const bucket = categoryMap.get(category);
-      bucket.push({
-        id: item.id,
-        definition: item,
-        quantity,
-        stacks: this.#splitStacks(quantity, item.stackLimit),
+    this.#emitChange('skills', detail);
+    return true;
+  }
+
+  updateSaveMetadata(partialMetadata = {}) {
+    if (!partialMetadata || typeof partialMetadata !== 'object') {
+      return this.getSaveMetadata();
+    }
+
+    const updates = { ...partialMetadata };
+
+    if ('lastLocation' in updates) {
+      updates.lastLocation =
+        updates.lastLocation && typeof updates.lastLocation === 'object'
+          ? { ...updates.lastLocation }
+          : null;
+    }
+
+    this.saveMetadata = { ...this.saveMetadata, ...updates };
+
+    const detail = {
+      metadata: this.getSaveMetadata(),
+      partial: updates,
+    };
+
+    this.#emitChange('saveMetadata', detail);
+    return detail.metadata;
+  }
+
+  setLastKnownLocation(location) {
+    return this.updateSaveMetadata({
+      lastLocation:
+        location && typeof location === 'object'
+          ? { x: location.x ?? 0, y: location.y ?? 0 }
+          : null,
+    });
+  }
+
+  setOption(key, value) {
+    if (typeof key !== 'string' || key.length === 0) {
+      throw new TypeError('option key must be a non-empty string');
+    }
+
+    this.settings = { ...this.settings, [key]: value };
+
+    const detail = {
+      key,
+      value,
+      settings: this.getSettings(),
+    };
+
+    this.#emitChange('settings', detail);
+    return detail.settings;
+  }
+
+  setOptions(options = {}) {
+    if (!options || typeof options !== 'object') {
+      return this.getSettings();
+    }
+
+    this.settings = { ...this.settings, ...options };
+
+    const detail = {
+      options: { ...options },
+      settings: this.getSettings(),
+    };
+
+    this.#emitChange('settings', detail);
+    return detail.settings;
+  }
+}
+
+let instance = null;
+
+export class GameState extends ObservableState {
+  constructor() {
+    super();
+
+    if (instance) {
+      return instance;
+    }
+
+    this.playerState = new PlayerState();
+    this.playerState.subscribe('change', (change) => {
+      this._emit('playerChange', change);
+      this._emit('change', {
+        type: 'player',
+        detail: change,
+        snapshot: this.getSnapshot(),
       });
-    }
+    });
 
-    for (const categoryName of this.categoryOrder) {
-      const entries = categoryMap.get(categoryName) ?? [];
-      if (!entries.length) {
-        continue;
-      }
-
-      categories.push({
-        category: categoryName,
-        items: entries,
-      });
-    }
-
-    return snapshot;
+    instance = this;
   }
 
-  destroy() {
-    this.inventoryListeners.clear();
-  }
-
-  #splitStacks(quantity, stackLimit) {
-    const limit = Number.isFinite(stackLimit) && stackLimit > 0 ? stackLimit : quantity;
-    const stacks = [];
-    let remaining = quantity;
-    while (remaining > 0) {
-      const stackSize = Math.min(limit, remaining);
-      stacks.push(stackSize);
-      remaining -= stackSize;
+  static getInstance() {
+    if (!instance) {
+      instance = new GameState();
     }
-    return stacks;
+
+    return instance;
   }
 
-  #emitInventoryChange() {
-    const payload = this.getInventorySnapshot();
-    for (const listener of this.inventoryListeners) {
-      listener(payload);
+  getPlayerState() {
+    return this.playerState;
+  }
+
+  getSnapshot() {
+    return {
+      player: this.playerState.getSnapshot(),
+    };
+  }
+
+  reset(options = {}) {
+    this.playerState.reset(options);
+
+    if (options.emit !== false) {
+      this._emit('reset', this.getSnapshot());
     }
   }
 }
+
+export const gameState = GameState.getInstance();

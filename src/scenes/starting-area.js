@@ -1,4 +1,5 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
+import { GameState } from '../core/game-state.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
 
@@ -26,13 +27,18 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
+  constructor(
+    root,
+    { config = STARTING_AREA_CONFIG, onExit, gameState = GameState.getInstance() } = {},
+  ) {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
     this.container = null;
     this.map = null;
     this.playerController = null;
+    this.gameState = gameState;
+    this.playerState = this.gameState.getPlayerState();
   }
 
   mount() {
@@ -42,11 +48,14 @@ export class StartingAreaScene {
     const canvas = this.container.querySelector('.starting-area__canvas');
     this.map = this.#createMap(canvas);
     this.followDuringInterpolation = this.map.followSmoothing > 0;
-    this.map.setCameraTarget(this.config.spawn);
-    this.map.setPlayerPosition(this.config.spawn);
+    const spawn = this.#resolveSpawnPoint();
+    this.map.setCameraTarget(spawn);
+    this.map.setPlayerPosition(spawn);
     this.map.start();
 
-    this.playerController = this.#createPlayerController();
+    this.playerState.setLastKnownLocation(spawn);
+
+    this.playerController = this.#createPlayerController(spawn);
     this.playerController.start();
   }
 
@@ -158,7 +167,7 @@ export class StartingAreaScene {
     });
   }
 
-  #createPlayerController() {
+  #createPlayerController(spawnPosition) {
     const movementSpeed = 6; // tiles per second
     const blockedTiles = new Set([
       this.config.tiles.TREE,
@@ -204,8 +213,10 @@ export class StartingAreaScene {
       return true;
     };
 
+    const initialPosition = spawnPosition ?? this.config.spawn;
+
     return new PlayerController({
-      position: this.config.spawn,
+      position: initialPosition,
       speed: movementSpeed,
       canMoveTo,
       onPositionChange: (position) => {
@@ -230,8 +241,24 @@ export class StartingAreaScene {
 
         const redraw = !this.followDuringInterpolation;
         this.map.setCameraTarget({ ...tilePosition }, { redraw });
+
+        this.playerState.setLastKnownLocation(nextPosition);
       },
     });
+  }
+
+  #resolveSpawnPoint() {
+    const lastKnown = this.playerState?.getLastKnownLocation?.();
+
+    if (
+      lastKnown &&
+      Number.isFinite(lastKnown.x) &&
+      Number.isFinite(lastKnown.y)
+    ) {
+      return { x: lastKnown.x, y: lastKnown.y };
+    }
+
+    return { ...this.config.spawn };
   }
 
   #createView() {
