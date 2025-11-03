@@ -11,6 +11,26 @@ const clamp = (value, min, max) => {
 };
 
 export class CanvasTileMap {
+  #handleResize = () => {
+    const dpr = window.devicePixelRatio ?? 1;
+    const displayWidth = Math.max(1, Math.floor(this.canvas.clientWidth * dpr));
+    const displayHeight = Math.max(1, Math.floor(this.canvas.clientHeight * dpr));
+
+    if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
+      this.canvas.width = displayWidth;
+      this.canvas.height = displayHeight;
+    }
+
+    const scaleX = displayWidth / this.viewportWidth;
+    const scaleY = displayHeight / this.viewportHeight;
+    this.scale = Math.min(scaleX, scaleY);
+
+    this.offsetX = (displayWidth - this.viewportWidth * this.scale) / 2;
+    this.offsetY = (displayHeight - this.viewportHeight * this.scale) / 2;
+
+    this.draw();
+  };
+
   constructor(canvas, {
     layout,
     tileSize,
@@ -39,8 +59,6 @@ export class CanvasTileMap {
     this.scale = 1;
     this.offsetX = 0;
     this.offsetY = 0;
-
-    this.#handleResize = this.#handleResize.bind(this);
   }
 
   start() {
@@ -160,26 +178,6 @@ export class CanvasTileMap {
     }
 
     return this.layout[y][x];
-  }
-
-  #handleResize() {
-    const dpr = window.devicePixelRatio ?? 1;
-    const displayWidth = Math.max(1, Math.floor(this.canvas.clientWidth * dpr));
-    const displayHeight = Math.max(1, Math.floor(this.canvas.clientHeight * dpr));
-
-    if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
-      this.canvas.width = displayWidth;
-      this.canvas.height = displayHeight;
-    }
-
-    const scaleX = displayWidth / this.viewportWidth;
-    const scaleY = displayHeight / this.viewportHeight;
-    this.scale = Math.min(scaleX, scaleY);
-
-    this.offsetX = (displayWidth - this.viewportWidth * this.scale) / 2;
-    this.offsetY = (displayHeight - this.viewportHeight * this.scale) / 2;
-
-    this.draw();
   }
 
   #updateCamera() {
