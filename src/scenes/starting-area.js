@@ -185,11 +185,27 @@ export class StartingAreaScene {
       speed: movementSpeed,
       canMoveTo,
       onPositionChange: (position) => {
-        this.map?.setPlayerPosition({ ...position });
+        if (!this.map) {
+          return;
+        }
+
+        const nextPosition = { ...position };
+        this.map.setPlayerPosition(nextPosition);
+
+        if (this.followDuringInterpolation) {
+          this.map.setCameraTarget({ ...position }, { redraw: false });
+        }
       },
       onStep: (tilePosition) => {
-        this.map?.setPlayerPosition({ ...tilePosition });
-        this.map?.setCameraTarget({ ...tilePosition });
+        if (!this.map) {
+          return;
+        }
+
+        const nextPosition = { ...tilePosition };
+        this.map.setPlayerPosition(nextPosition);
+
+        const redraw = !this.followDuringInterpolation;
+        this.map.setCameraTarget({ ...tilePosition }, { redraw });
       },
     });
   }
