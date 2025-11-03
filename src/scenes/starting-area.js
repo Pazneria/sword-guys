@@ -1,4 +1,5 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
+import { GameState } from '../core/game-state.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
 import { GameMenu } from '../ui/components/game-menu.js';
@@ -27,72 +28,9 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  #handleGlobalKeyDown = (event) => {
-    if (!this.gameMenu) {
-      return;
-    }
-
-    const key = event?.key;
-    if (typeof key !== 'string') {
-      return;
-    }
-
-    const isToggleKey = key === 'e' || key === 'E';
-    if (isToggleKey) {
-      if (event?.repeat) {
-        return;
-      }
-
-      event?.preventDefault?.();
-      if (this.gameMenu.isVisible()) {
-        this.gameMenu.hide();
-      } else {
-        this.gameMenu.show();
-      }
-      return;
-    }
-
-    if (key === 'Escape' && this.gameMenu.isVisible()) {
-      event?.preventDefault?.();
-      this.gameMenu.hide();
-    }
-  };
-
-  #handleMenuShown = () => {
-    if (this.playerController && this.playerControllerActive) {
-      this.playerController.stop();
-      this.playerControllerActive = false;
-      this.playerPausedForMenu = true;
-    }
-  };
-
-  #handleMenuHidden = () => {
-    if (this.playerController && this.playerPausedForMenu && !this.playerControllerActive) {
-      this.playerController.start();
-      this.playerControllerActive = true;
-    }
-
-    this.playerPausedForMenu = false;
-  };
-
-  #handleMenuSelect = (value) => {
-    if (value === 'return-to-title') {
-      this.gameMenu?.hide();
-      if (typeof this.onExit === 'function') {
-        this.onExit();
-      }
-    }
-  };
-
   constructor(
     root,
-    {
-      config = STARTING_AREA_CONFIG,
-      onExit,
-      document: providedDocument,
-      window: providedWindow,
-      factories,
-    } = {},
+    { config = STARTING_AREA_CONFIG, onExit, gameState = GameState.getInstance() } = {},
   ) {
     this.root = root;
     this.config = config;
@@ -106,25 +44,8 @@ export class StartingAreaScene {
     this.container = null;
     this.map = null;
     this.playerController = null;
-    this.gameMenu = null;
-    this.playerControllerActive = false;
-    this.playerPausedForMenu = false;
-
-    const resolvedFactories = factories ?? {};
-    this.factories = {
-      createMap:
-        typeof resolvedFactories.createMap === 'function'
-          ? resolvedFactories.createMap
-          : (canvas) => this.#createMap(canvas),
-      createPlayerController:
-        typeof resolvedFactories.createPlayerController === 'function'
-          ? resolvedFactories.createPlayerController
-          : () => this.#createPlayerController(),
-      createGameMenu:
-        typeof resolvedFactories.createGameMenu === 'function'
-          ? resolvedFactories.createGameMenu
-          : (options = {}) => new GameMenu({ document: this.document, ...options }),
-    };
+    this.gameState = gameState;
+    this.playerState = this.gameState.getPlayerState();
   }
 
   mount() {
@@ -132,34 +53,17 @@ export class StartingAreaScene {
     this.root.replaceChildren(this.container);
 
     const canvas = this.container.querySelector('.starting-area__canvas');
-    this.map = this.factories.createMap(canvas);
-    this.followDuringInterpolation = Boolean(this.map?.followSmoothing > 0);
-    this.map?.setCameraTarget?.(this.config.spawn);
-    this.map?.setPlayerPosition?.(this.config.spawn);
-    this.map?.start?.();
+    this.map = this.#createMap(canvas);
+    this.followDuringInterpolation = this.map.followSmoothing > 0;
+    const spawn = this.#resolveSpawnPoint();
+    this.map.setCameraTarget(spawn);
+    this.map.setPlayerPosition(spawn);
+    this.map.start();
 
-    this.playerController = this.factories.createPlayerController();
-    if (this.playerController && typeof this.playerController.start === 'function') {
-      this.playerController.start();
-      this.playerControllerActive = true;
-    } else {
-      this.playerControllerActive = false;
-    }
+    this.playerState.setLastKnownLocation(spawn);
 
-    this.gameMenu = this.factories.createGameMenu({
-      document: this.document,
-      onSelect: this.#handleMenuSelect,
-      onShow: this.#handleMenuShown,
-      onHide: this.#handleMenuHidden,
-    });
-
-    if (this.gameMenu?.element) {
-      this.container.append(this.gameMenu.element);
-    }
-
-    if (this.window && typeof this.window.addEventListener === 'function') {
-      this.window.addEventListener('keydown', this.#handleGlobalKeyDown);
-    }
+    this.playerController = this.#createPlayerController(spawn);
+    this.playerController.start();
   }
 
   unmount() {
@@ -281,7 +185,7 @@ export class StartingAreaScene {
     });
   }
 
-  #createPlayerController() {
+  #createPlayerController(spawnPosition) {
     const movementSpeed = 6; // tiles per second
     const blockedTiles = new Set([
       this.config.tiles.TREE,
@@ -327,8 +231,10 @@ export class StartingAreaScene {
       return true;
     };
 
+    const initialPosition = spawnPosition ?? this.config.spawn;
+
     return new PlayerController({
-      position: this.config.spawn,
+      position: initialPosition,
       speed: movementSpeed,
       canMoveTo,
       onPositionChange: (position) => {
@@ -353,8 +259,24 @@ export class StartingAreaScene {
 
         const redraw = !this.followDuringInterpolation;
         this.map.setCameraTarget({ ...tilePosition }, { redraw });
+
+        this.playerState.setLastKnownLocation(nextPosition);
       },
     });
+  }
+
+  #resolveSpawnPoint() {
+    const lastKnown = this.playerState?.getLastKnownLocation?.();
+
+    if (
+      lastKnown &&
+      Number.isFinite(lastKnown.x) &&
+      Number.isFinite(lastKnown.y)
+    ) {
+      return { x: lastKnown.x, y: lastKnown.y };
+    }
+
+    return { ...this.config.spawn };
   }
 
   #createView() {
