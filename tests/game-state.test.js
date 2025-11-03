@@ -1,54 +1,76 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { GameState } from '../src/entities/game-state.js';
+import { GameState } from '../src/core/game-state.js';
 
-test('skills respect prerequisites and skill point costs', () => {
-  const state = new GameState({ skillPoints: 5 });
+const SLOT_IDS = {
+  weapon: 'weapon',
+  offhand: 'offhand',
+  head: 'head',
+  body: 'body',
+  accessory: 'accessory',
+};
 
-  assert.deepEqual(state.getLearnedSkills(), [], 'no skills should be learned initially');
-  assert.ok(state.canLearnSkill('quick-strike'), 'root offensive skill should be learnable');
+const ITEM_IDS = {
+  sword: 'rusty-sword',
+  shield: 'oak-shield',
+  cap: 'leather-cap',
+  vest: 'leather-vest',
+  charm: 'traveler-charm',
+};
 
-  const quickLearned = state.learnSkill('quick-strike');
-  assert.equal(quickLearned, true);
-  assert.ok(state.hasLearnedSkill('quick-strike'), 'skill should be marked as learned');
-  assert.equal(state.skillPoints, 4, 'skill points should be reduced by the cost of quick-strike');
-
-  assert.equal(state.canLearnSkill('quick-strike'), false, 'learned skills cannot be relearned');
-  assert.equal(state.canLearnSkill('whirlwind'), false, 'deep skills require their entire chain');
-
-  assert.ok(state.canLearnSkill('power-slash'), 'power-slash requires quick-strike and enough points');
-  state.learnSkill('power-slash');
-  assert.ok(state.hasLearnedSkill('power-slash'));
-
-  assert.ok(state.getAvailableSkills().includes('whirlwind'), 'whirlwind becomes available once prerequisites are met');
-  assert.equal(state.canLearnSkill('whirlwind'), false, 'insufficient points prevent learning whirlwind');
-
-  state.setSkillPoints(5);
-  assert.ok(state.canLearnSkill('whirlwind'), 'adding points allows learning the final skill');
-});
-
-test('skill learning emits change events with updated collections', () => {
-  const state = new GameState({ skillPoints: 3 });
-  const events = [];
-
-  state.addEventListener('skillschange', (event) => {
-    events.push(event.detail);
+test('equipItem moves the item from inventory into the equipped slot', () => {
+  const state = new GameState({
+    inventory: [ITEM_IDS.sword],
   });
 
-  state.learnSkill('quick-strike');
+  const result = state.equipItem(SLOT_IDS.weapon, ITEM_IDS.sword);
 
-  assert.equal(events.length, 1);
-  const [detail] = events;
-  assert.equal(detail.action, 'learned');
-  assert.deepEqual(detail.learned, ['quick-strike']);
-  assert.ok(detail.available.includes('power-slash'));
-  assert.equal(detail.skillPoints, 2);
-
-  state.setSkillPoints(5);
-  assert.equal(events.length, 2, 'changing points should emit an event');
-  const [, pointsDetail] = events;
-  assert.equal(pointsDetail.action, 'points');
-  assert.equal(pointsDetail.skillPoints, 5);
+  assert.deepEqual(result, { equipped: ITEM_IDS.sword, unequipped: null });
+  assert.equal(state.getEquipped(SLOT_IDS.weapon), ITEM_IDS.sword);
+  assert.deepEqual(state.getInventory(), []);
 });
 
+test('equipping an item replaces the existing item and returns it to inventory', () => {
+  const state = new GameState({
+    inventory: [ITEM_IDS.shield],
+    equipment: { [SLOT_IDS.offhand]: ITEM_IDS.sword },
+  });
+
+  const result = state.equipItem(SLOT_IDS.offhand, ITEM_IDS.shield);
+
+  assert.deepEqual(result, { equipped: ITEM_IDS.shield, unequipped: ITEM_IDS.sword });
+  assert.equal(state.getEquipped(SLOT_IDS.offhand), ITEM_IDS.shield);
+  assert.deepEqual(state.getInventory(), [ITEM_IDS.sword]);
+});
+
+test('unequipItem returns the item to inventory', () => {
+  const state = new GameState({
+    inventory: [],
+    equipment: { [SLOT_IDS.head]: ITEM_IDS.cap },
+  });
+
+  const returned = state.unequipItem(SLOT_IDS.head);
+
+  assert.equal(returned, ITEM_IDS.cap);
+  assert.equal(state.getEquipped(SLOT_IDS.head), null);
+  assert.deepEqual(state.getInventory(), [ITEM_IDS.cap]);
+});
+
+test('equipItem throws when the slot does not accept the item', () => {
+  const state = new GameState({
+    inventory: [ITEM_IDS.cap],
+  });
+
+  assert.throws(() => {
+    state.equipItem(SLOT_IDS.weapon, ITEM_IDS.cap);
+  }, /cannot be equipped/);
+});
+
+test('equipItem throws when the item is not in the inventory', () => {
+  const state = new GameState();
+
+  assert.throws(() => {
+    state.equipItem(SLOT_IDS.weapon, ITEM_IDS.sword);
+  }, /not available in the inventory/);
+});
