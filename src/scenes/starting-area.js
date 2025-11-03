@@ -154,6 +154,7 @@ export class StartingAreaScene {
       drawTile,
       backgroundColor: '#120721',
       followSmoothing: 0.2,
+      preloadTiles: { columns: 2, rows: 2 },
     });
   }
 
