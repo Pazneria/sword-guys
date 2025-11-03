@@ -1,4 +1,5 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
+import { GameState } from '../core/game-state.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
 
@@ -26,24 +27,38 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
+  constructor(root, { config = STARTING_AREA_CONFIG, onExit, saveManager } = {}) {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
+    this.saveManager = saveManager ?? null;
     this.container = null;
     this.map = null;
     this.playerController = null;
+    this.playerStartPosition = { ...this.config.spawn };
+    this.lastSelectedSlot = 'slot-1';
+    this.saveElements = { slotSelect: null, message: null, button: null };
+    this.saveMessageTimer = null;
   }
 
   mount() {
     this.container = this.#createView();
     this.root.replaceChildren(this.container);
 
+    GameState.setScene('starting-area');
+    const storedPosition = GameState.getPlayerPosition();
+    if (storedPosition) {
+      this.playerStartPosition = { ...storedPosition };
+    } else {
+      this.playerStartPosition = { ...this.config.spawn };
+      GameState.updatePlayerPosition(this.playerStartPosition);
+    }
+
     const canvas = this.container.querySelector('.starting-area__canvas');
     this.map = this.#createMap(canvas);
     this.followDuringInterpolation = this.map.followSmoothing > 0;
-    this.map.setCameraTarget(this.config.spawn);
-    this.map.setPlayerPosition(this.config.spawn);
+    this.map.setCameraTarget(this.playerStartPosition);
+    this.map.setPlayerPosition(this.playerStartPosition);
     this.map.start();
 
     this.playerController = this.#createPlayerController();
@@ -51,6 +66,11 @@ export class StartingAreaScene {
   }
 
   unmount() {
+    if (this.saveMessageTimer) {
+      clearTimeout(this.saveMessageTimer);
+      this.saveMessageTimer = null;
+    }
+
     if (this.playerController) {
       this.playerController.stop();
       this.playerController = null;
@@ -205,7 +225,7 @@ export class StartingAreaScene {
     };
 
     return new PlayerController({
-      position: this.config.spawn,
+      position: this.playerStartPosition,
       speed: movementSpeed,
       canMoveTo,
       onPositionChange: (position) => {
@@ -227,6 +247,7 @@ export class StartingAreaScene {
 
         const nextPosition = { ...tilePosition };
         this.map.setPlayerPosition(nextPosition);
+        GameState.updatePlayerPosition(nextPosition);
 
         const redraw = !this.followDuringInterpolation;
         this.map.setCameraTarget({ ...tilePosition }, { redraw });
@@ -251,6 +272,10 @@ export class StartingAreaScene {
 
     overlay.append(heading);
 
+    if (this.saveManager) {
+      overlay.append(this.#createSaveMenu());
+    }
+
     if (typeof this.onExit === 'function') {
       const controls = document.createElement('div');
       controls.className = 'starting-area__controls';
@@ -269,5 +294,145 @@ export class StartingAreaScene {
 
     container.append(overlay);
     return container;
+  }
+
+  #createSaveMenu() {
+    const menu = document.createElement('div');
+    menu.className = 'starting-area__menu';
+
+    const slotField = document.createElement('div');
+    slotField.className = 'starting-area__menu-field';
+
+    const slotLabel = document.createElement('label');
+    slotLabel.className = 'starting-area__label';
+    slotLabel.textContent = 'Save Slot';
+    slotLabel.htmlFor = 'starting-area-save-slot';
+
+    const slotSelect = document.createElement('select');
+    slotSelect.className = 'starting-area__select';
+    slotSelect.id = 'starting-area-save-slot';
+
+    const slots = this.#buildSlotList();
+    slots.forEach((slotId) => {
+      const option = document.createElement('option');
+      option.value = slotId;
+      option.textContent = this.#formatSlotLabel(slotId);
+      slotSelect.append(option);
+    });
+
+    const defaultSlot = slots.includes(this.lastSelectedSlot) ? this.lastSelectedSlot : slots[0];
+    slotSelect.value = defaultSlot;
+    this.lastSelectedSlot = defaultSlot;
+
+    slotField.append(slotLabel, slotSelect);
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'starting-area__button starting-area__button--save';
+    saveButton.textContent = 'Save Game';
+    saveButton.addEventListener('click', () => {
+      this.#handleSaveCommand();
+    });
+
+    const message = document.createElement('p');
+    message.className = 'starting-area__message';
+
+    menu.append(slotField, saveButton, message);
+
+    this.saveElements = {
+      slotSelect,
+      message,
+      button: saveButton,
+    };
+
+    return menu;
+  }
+
+  #buildSlotList() {
+    const defaultSlots = ['slot-1', 'slot-2', 'slot-3'];
+    const slotSet = new Set(defaultSlots);
+
+    if (this.saveManager) {
+      try {
+        this.saveManager.listSlots().forEach((slot) => {
+          if (slot?.slotId) {
+            slotSet.add(slot.slotId);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to populate save slot list', error);
+      }
+    }
+
+    return Array.from(slotSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  }
+
+  #handleSaveCommand() {
+    if (!this.saveManager || !this.saveElements.slotSelect) {
+      return;
+    }
+
+    const slotId = this.saveElements.slotSelect.value;
+    this.lastSelectedSlot = slotId;
+
+    try {
+      const result = this.saveManager.save(slotId, GameState.snapshot());
+      const updatedAt = result?.metadata?.updatedAt ? new Date(result.metadata.updatedAt) : null;
+      const formattedTime = updatedAt ? updatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const message = formattedTime
+        ? `Saved to ${this.#formatSlotLabel(slotId)} at ${formattedTime}.`
+        : `Saved to ${this.#formatSlotLabel(slotId)}.`;
+      this.#showSaveMessage(message, 'success');
+    } catch (error) {
+      console.error('Failed to save game', error);
+      const message = error instanceof Error ? error.message : 'Unknown error occurred while saving.';
+      this.#showSaveMessage(`Save failed: ${message}`, 'error');
+    }
+  }
+
+  #showSaveMessage(text, state) {
+    if (!this.saveElements.message) {
+      return;
+    }
+
+    this.saveElements.message.textContent = text;
+    this.saveElements.message.classList.remove(
+      'starting-area__message--success',
+      'starting-area__message--error',
+    );
+
+    if (state === 'success') {
+      this.saveElements.message.classList.add('starting-area__message--success');
+    } else if (state === 'error') {
+      this.saveElements.message.classList.add('starting-area__message--error');
+    }
+
+    if (this.saveMessageTimer) {
+      clearTimeout(this.saveMessageTimer);
+    }
+
+    this.saveMessageTimer = setTimeout(() => {
+      if (this.saveElements.message) {
+        this.saveElements.message.textContent = '';
+        this.saveElements.message.classList.remove(
+          'starting-area__message--success',
+          'starting-area__message--error',
+        );
+      }
+      this.saveMessageTimer = null;
+    }, 4000);
+  }
+
+  #formatSlotLabel(slotId) {
+    if (typeof slotId !== 'string') {
+      return 'Slot';
+    }
+
+    const match = /slot-(\d+)/i.exec(slotId);
+    if (match) {
+      return `Slot ${match[1]}`;
+    }
+
+    return slotId;
   }
 }

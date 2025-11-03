@@ -40,6 +40,56 @@
   text-transform: uppercase;
 }
 
+.starting-area__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(18, 7, 33, 0.65);
+  border: 1px solid rgba(251, 210, 123, 0.25);
+  border-radius: 0.4rem;
+}
+
+.starting-area__menu-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.starting-area__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.starting-area__select {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(251, 210, 123, 0.5);
+  background: rgba(26, 11, 53, 0.85);
+  color: inherit;
+  font-size: 0.95rem;
+}
+
+.starting-area__button--save {
+  align-self: flex-start;
+}
+
+.starting-area__message {
+  min-height: 1.2rem;
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.starting-area__message--success {
+  color: #8ef0b7;
+}
+
+.starting-area__message--error {
+  color: #f0938e;
+}
+
 .starting-area__controls {
   display: flex;
   justify-content: center;

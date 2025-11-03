@@ -1,15 +1,18 @@
 export class TitleScreen {
-  constructor(root, { onNew, onContinue, onLoad } = {}) {
+  constructor(root, { onNew, onContinue, onLoad, saveManager } = {}) {
     this.root = root;
     this.onNew = onNew;
     this.onContinue = onContinue;
     this.onLoad = onLoad;
+    this.saveManager = saveManager ?? null;
     this.container = null;
+    this.saveSlots = [];
   }
 
   mount() {
     this.container = this.#createView();
     this.root.replaceChildren(this.container);
+    this.#refreshSaveButtons();
   }
 
   unmount() {
@@ -34,9 +37,9 @@ export class TitleScreen {
     menu.className = 'title-screen__menu';
 
     const options = [
-      { label: 'Continue', handler: this.onContinue },
-      { label: 'New', handler: this.onNew },
-      { label: 'Load', handler: this.onLoad },
+      { id: 'continue', label: 'Continue', handler: () => this.#handleContinue() },
+      { id: 'new', label: 'New', handler: () => this.onNew?.() },
+      { id: 'load', label: 'Load', handler: () => this.#handleLoad() },
     ];
 
     this.buttons = [];
@@ -64,7 +67,7 @@ export class TitleScreen {
 
       item.append(button);
       menu.append(item);
-      this.buttons.push({ button, handler: option.handler });
+      this.buttons.push({ id: option.id, button, handler: option.handler });
     });
 
     container.append(menu);
@@ -121,6 +124,9 @@ export class TitleScreen {
     }
 
     const { handler, button } = entry;
+    if (button.disabled) {
+      return;
+    }
     button.classList.add('title-screen__menu-option--pressed');
     if (typeof handler === 'function') {
       handler();
@@ -147,5 +153,66 @@ export class TitleScreen {
     button.disabled = true;
     button.title = 'Coming soon';
     return button;
+  }
+
+  #refreshSaveButtons() {
+    let slots = [];
+
+    if (this.saveManager) {
+      try {
+        slots = this.saveManager.listSlots();
+      } catch (error) {
+        console.error('Failed to list save slots', error);
+        slots = [];
+      }
+    }
+
+    this.saveSlots = slots;
+    const hasSaves = slots.length > 0;
+
+    this.buttons
+      .filter((entry) => entry.id === 'continue' || entry.id === 'load')
+      .forEach((entry) => {
+        entry.button.disabled = !hasSaves;
+        entry.button.setAttribute('aria-disabled', String(!hasSaves));
+      });
+  }
+
+  #handleContinue() {
+    if (!this.saveSlots.length || !this.saveManager) {
+      return;
+    }
+
+    const latest = this.saveSlots[0];
+    let payload = { ...latest };
+
+    try {
+      const data = this.saveManager.load(latest.slotId);
+      payload = { ...latest, data };
+    } catch (error) {
+      console.error('Failed to load save slot for continue', error);
+      return;
+    }
+
+    this.onContinue?.(payload);
+  }
+
+  #handleLoad() {
+    if (!this.saveSlots.length || !this.saveManager) {
+      return;
+    }
+
+    const slots = this.saveSlots.map((slot) => {
+      let data = null;
+      try {
+        data = this.saveManager.load(slot.slotId);
+      } catch (error) {
+        console.error('Failed to load slot during load menu preparation', error);
+      }
+
+      return { ...slot, data };
+    });
+
+    this.onLoad?.(slots);
   }
 }
