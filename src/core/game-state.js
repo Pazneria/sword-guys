@@ -1,397 +1,442 @@
-const DEFAULT_MOVEMENT_BINDINGS = Object.freeze({
-  up: ['ArrowUp', 'w', 'W'],
-  down: ['ArrowDown', 's', 'S'],
-  left: ['ArrowLeft', 'a', 'A'],
-  right: ['ArrowRight', 'd', 'D'],
-  upRight: [],
-  upLeft: [],
-  downRight: [],
-  downLeft: [],
-});
-
-const DEFAULT_ACTION_BINDINGS = Object.freeze({
-  interact: ['Enter', ' '],
-  menu: ['Escape'],
-});
-
-const DEFAULT_SETTINGS = Object.freeze({
-  audio: {
-    masterVolume: 1,
-    musicVolume: 0.8,
-    sfxVolume: 0.9,
-    muteAll: false,
-  },
-  keybindings: {
-    movement: DEFAULT_MOVEMENT_BINDINGS,
-    actions: DEFAULT_ACTION_BINDINGS,
-  },
-  accessibility: {
-    subtitles: true,
-    highContrast: false,
-    reduceMotion: false,
-    screenShake: true,
-  },
-});
-
-const DEFAULT_STORAGE_KEY = 'sword-guys.settings';
-
-const LETTER_PATTERN = /^[a-z]$/i;
-
-const clone = (value) => {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(value);
+const cloneValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneValue(entry));
   }
 
-  return JSON.parse(JSON.stringify(value));
-};
-
-const isPlainObject = (value) =>
-  value != null && typeof value === 'object' && !Array.isArray(value);
-
-const clamp = (value, min, max) => {
-  const numeric = Number(value);
-  if (Number.isNaN(numeric)) {
-    return min;
+  if (value && typeof value === 'object') {
+    return { ...value };
   }
 
-  return Math.min(max, Math.max(min, numeric));
+  return value;
 };
 
-const mergeWithTemplate = (template, base = {}, patch = {}) => {
-  const result = {};
-  const baseSource = isPlainObject(base) ? base : {};
-  const patchSource = isPlainObject(patch) ? patch : {};
+const createDefaultStats = () => ({
+  health: 100,
+  maxHealth: 100,
+  mana: 50,
+  maxMana: 50,
+  strength: 10,
+  agility: 10,
+  intelligence: 10,
+  defense: 5,
+  level: 1,
+  experience: 0,
+});
 
-  Object.keys(template).forEach((key) => {
-    const templateValue = template[key];
-    const baseValue = baseSource[key];
-    const patchHasKey = Object.prototype.hasOwnProperty.call(patchSource, key);
-    const patchValue = patchSource[key];
+const createDefaultEquipment = () => ({
+  weapon: null,
+  armor: null,
+  accessory: null,
+});
 
-    if (Array.isArray(templateValue)) {
-      if (patchHasKey && Array.isArray(patchValue)) {
-        result[key] = patchValue.slice();
-      } else if (Array.isArray(baseValue)) {
-        result[key] = baseValue.slice();
-      } else {
-        result[key] = templateValue.slice();
-      }
+const createDefaultSettings = () => ({
+  volume: 0.7,
+  difficulty: 'normal',
+  showSubtitles: true,
+  language: 'en',
+});
+
+const createDefaultSaveMetadata = () => ({
+  slot: 1,
+  lastSavedAt: null,
+  lastLocation: null,
+  playTime: 0,
+});
+
+class ObservableState {
+  constructor() {
+    this._listeners = new Map();
+  }
+
+  subscribe(event, listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('listener must be a function');
+    }
+
+    if (!this._listeners.has(event)) {
+      this._listeners.set(event, new Set());
+    }
+
+    const listeners = this._listeners.get(event);
+    listeners.add(listener);
+
+    return () => this.unsubscribe(event, listener);
+  }
+
+  unsubscribe(event, listener) {
+    const listeners = this._listeners.get(event);
+    if (!listeners) {
       return;
     }
 
-    if (isPlainObject(templateValue)) {
-      const nextBase = isPlainObject(baseValue) ? baseValue : templateValue;
-      const nextPatch = isPlainObject(patchValue) ? patchValue : {};
-      result[key] = mergeWithTemplate(templateValue, nextBase, nextPatch);
+    listeners.delete(listener);
+
+    if (listeners.size === 0) {
+      this._listeners.delete(event);
+    }
+  }
+
+  _emit(event, payload) {
+    const listeners = this._listeners.get(event);
+    if (!listeners || listeners.size === 0) {
       return;
     }
 
-    if (patchHasKey && patchValue !== undefined) {
-      result[key] = patchValue;
-    } else if (baseValue !== undefined) {
-      result[key] = baseValue;
-    } else {
-      result[key] = templateValue;
-    }
-  });
-
-  return result;
-};
-
-const normalizeKeyList = (input, fallback = []) => {
-  const normalized = [];
-  const seen = new Set();
-
-  const addKey = (key) => {
-    if (!key || seen.has(key)) {
-      return;
-    }
-
-    seen.add(key);
-    normalized.push(key);
-  };
-
-  const source = Array.isArray(input)
-    ? input
-    : typeof input === 'string'
-    ? input.split(',')
-    : [];
-
-  source
-    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-    .filter((entry) => entry.length > 0)
-    .forEach((entry) => {
-      addKey(entry);
-      if (LETTER_PATTERN.test(entry)) {
-        const alternate = entry === entry.toLowerCase() ? entry.toUpperCase() : entry.toLowerCase();
-        addKey(alternate);
-      }
+    [...listeners].forEach((listener) => {
+      listener(payload);
     });
-
-  if (!normalized.length) {
-    fallback.forEach((entry) => addKey(entry));
   }
+}
 
-  return normalized;
-};
+export class PlayerState extends ObservableState {
+  constructor(initialState = {}) {
+    super();
 
-const normalizeMovementBindings = (bindings) => {
-  const defaults = DEFAULT_SETTINGS.keybindings.movement;
-  const source = isPlainObject(bindings) ? bindings : {};
-  const normalized = {};
+    this.inventory = [];
+    this.stats = createDefaultStats();
+    this.equipment = createDefaultEquipment();
+    this.skills = new Set();
+    this.saveMetadata = createDefaultSaveMetadata();
+    this.settings = createDefaultSettings();
 
-  Object.keys(defaults).forEach((direction) => {
-    normalized[direction] = normalizeKeyList(source[direction], defaults[direction]);
-  });
-
-  return normalized;
-};
-
-const normalizeActionBindings = (bindings) => {
-  const defaults = DEFAULT_SETTINGS.keybindings.actions;
-  const source = isPlainObject(bindings) ? bindings : {};
-  const normalized = {};
-
-  Object.keys(defaults).forEach((action) => {
-    normalized[action] = normalizeKeyList(source[action], defaults[action]);
-  });
-
-  return normalized;
-};
-
-const normalizeAccessibility = (accessibility) => {
-  const defaults = DEFAULT_SETTINGS.accessibility;
-  const source = isPlainObject(accessibility) ? accessibility : {};
-  const normalized = {};
-
-  Object.keys(defaults).forEach((key) => {
-    const value = source[key];
-    normalized[key] = typeof value === 'boolean' ? value : defaults[key];
-  });
-
-  return normalized;
-};
-
-const normalizeAudio = (audio) => {
-  const defaults = DEFAULT_SETTINGS.audio;
-  const source = isPlainObject(audio) ? audio : {};
-  const normalized = {};
-
-  Object.keys(defaults).forEach((key) => {
-    const defaultValue = defaults[key];
-    const provided = source[key];
-
-    if (typeof defaultValue === 'number') {
-      let numeric = null;
-      if (typeof provided === 'number' && Number.isFinite(provided)) {
-        numeric = provided;
-      } else if (typeof provided === 'string' && provided.trim().length > 0) {
-        const parsed = Number(provided);
-        if (!Number.isNaN(parsed)) {
-          numeric = parsed;
-        }
-      }
-
-      normalized[key] = numeric == null ? defaultValue : clamp(numeric, 0, 1);
-      return;
+    if (initialState) {
+      this.reset({ initialState, emit: false });
     }
-
-    if (typeof defaultValue === 'boolean') {
-      normalized[key] = typeof provided === 'boolean' ? provided : defaultValue;
-      return;
-    }
-
-    normalized[key] = provided ?? defaultValue;
-  });
-
-  return normalized;
-};
-
-const extractSettings = (candidate) => {
-  if (!isPlainObject(candidate)) {
-    return null;
   }
 
-  if (isPlainObject(candidate.settings)) {
-    return candidate.settings;
-  }
-
-  return candidate;
-};
-
-export class GameState {
-  constructor({ storageKey = DEFAULT_STORAGE_KEY, storage, saveManager } = {}) {
-    this.storageKey = storageKey;
-    this.storage = storage ?? (typeof window !== 'undefined' ? window.localStorage : null);
-    this.saveManager = saveManager ?? null;
-
-    this.state = {
-      settings: this.#normalizeSettings({}, DEFAULT_SETTINGS),
+  #emitChange(type, detail) {
+    const payload = {
+      type,
+      detail,
+      snapshot: this.getSnapshot(),
     };
 
-    this.subscribers = new Set();
-    this.initialized = false;
+    this._emit(type, detail);
+    this._emit('change', payload);
   }
 
-  static get DEFAULT_SETTINGS() {
-    return clone(DEFAULT_SETTINGS);
+  reset({ emit = true, initialState = null } = {}) {
+    const state = initialState ?? {};
+
+    const stats = state.stats ?? {};
+    const inventory = state.inventory ?? [];
+    const equipment = state.equipment ?? {};
+    const skills = state.skills ?? [];
+    const saveMetadata = state.saveMetadata ?? {};
+    const settings = state.settings ?? {};
+
+    this.inventory = inventory.map((item) => cloneValue(item));
+    this.stats = { ...createDefaultStats(), ...stats };
+    this.equipment = { ...createDefaultEquipment(), ...equipment };
+    this.skills = new Set(Array.isArray(skills) ? skills : []);
+    this.saveMetadata = {
+      ...createDefaultSaveMetadata(),
+      ...saveMetadata,
+      lastLocation: saveMetadata.lastLocation ? { ...saveMetadata.lastLocation } : null,
+    };
+    this.settings = { ...createDefaultSettings(), ...settings };
+
+    if (emit) {
+      this.#emitChange('reset', { snapshot: this.getSnapshot() });
+    }
   }
 
-  static get DEFAULT_STORAGE_KEY() {
-    return DEFAULT_STORAGE_KEY;
-  }
-
-  async initialize() {
-    await this.loadSettings();
-    this.initialized = true;
-    return this.getSettings();
-  }
-
-  getState() {
+  getSnapshot() {
     return {
-      settings: clone(this.state.settings),
+      inventory: this.inventory.map((item) => cloneValue(item)),
+      stats: { ...this.stats },
+      equipment: { ...this.equipment },
+      skills: [...this.skills],
+      saveMetadata: {
+        ...this.saveMetadata,
+        lastLocation: this.saveMetadata.lastLocation
+          ? { ...this.saveMetadata.lastLocation }
+          : null,
+      },
+      settings: { ...this.settings },
     };
+  }
+
+  getStats() {
+    return { ...this.stats };
+  }
+
+  getInventory() {
+    return this.inventory.map((item) => cloneValue(item));
+  }
+
+  getEquipment() {
+    return { ...this.equipment };
+  }
+
+  getSkills() {
+    return [...this.skills];
   }
 
   getSettings() {
-    return clone(this.state.settings);
+    return { ...this.settings };
   }
 
-  async loadSettings() {
-    const persisted = await this.#loadPersistedSettings();
-    if (persisted) {
-      this.state.settings = this.#normalizeSettings(persisted, this.state.settings);
-    } else {
-      this.state.settings = this.#normalizeSettings({}, this.state.settings);
-    }
-
-    this.#notifySubscribers('settings', this.state.settings);
-    return this.getSettings();
-  }
-
-  previewSettings(update = {}) {
-    return this.#normalizeSettings(update, this.state.settings);
-  }
-
-  async updateSettings(update = {}, { persist = true } = {}) {
-    this.state.settings = this.#normalizeSettings(update, this.state.settings);
-    this.#notifySubscribers('settings', this.state.settings);
-
-    if (persist) {
-      await this.persistSettings();
-    }
-
-    return this.getSettings();
-  }
-
-  async resetSettings({ persist = true } = {}) {
-    this.state.settings = this.#normalizeSettings({}, DEFAULT_SETTINGS);
-    this.#notifySubscribers('settings', this.state.settings);
-
-    if (persist) {
-      await this.persistSettings();
-    }
-
-    return this.getSettings();
-  }
-
-  async persistSettings() {
-    const payload = { settings: this.state.settings };
-
-    if (this.saveManager?.save) {
-      try {
-        await this.saveManager.save(this.storageKey, clone(payload));
-        return this.getSettings();
-      } catch (error) {
-        // Swallow persistence errors to avoid crashing the game loop.
-      }
-    }
-
-    if (this.storage?.setItem) {
-      try {
-        this.storage.setItem(this.storageKey, JSON.stringify(payload));
-      } catch (error) {
-        // Ignore storage errors (e.g., quota exceeded or unavailable).
-      }
-    }
-
-    return this.getSettings();
-  }
-
-  subscribe(callback) {
-    if (typeof callback !== 'function') {
-      return () => {};
-    }
-
-    this.subscribers.add(callback);
-
-    return () => {
-      this.subscribers.delete(callback);
+  getSaveMetadata() {
+    return {
+      ...this.saveMetadata,
+      lastLocation: this.saveMetadata.lastLocation
+        ? { ...this.saveMetadata.lastLocation }
+        : null,
     };
   }
 
-  async #loadPersistedSettings() {
-    if (this.saveManager?.load) {
-      try {
-        const loaded = await this.saveManager.load(this.storageKey);
-        const extracted = extractSettings(loaded);
-        if (extracted) {
-          return extracted;
-        }
-      } catch (error) {
-        // Ignore persistence load failures and fallback to defaults.
-      }
-    }
-
-    if (this.storage?.getItem) {
-      try {
-        const raw = this.storage.getItem(this.storageKey);
-        if (!raw) {
-          return null;
-        }
-
-        const parsed = JSON.parse(raw);
-        return extractSettings(parsed);
-      } catch (error) {
-        return null;
-      }
-    }
-
-    return null;
+  getLastKnownLocation() {
+    const location = this.saveMetadata.lastLocation;
+    return location ? { ...location } : null;
   }
 
-  #notifySubscribers(section, value) {
-    if (!this.subscribers.size) {
-      return;
+  updateStats(partialStats = {}) {
+    if (!partialStats || typeof partialStats !== 'object') {
+      return this.getStats();
     }
 
-    const snapshot = this.getState();
+    this.stats = { ...this.stats, ...partialStats };
     const detail = {
-      section,
-      value: clone(value),
+      stats: this.getStats(),
+      partial: { ...partialStats },
     };
 
-    this.subscribers.forEach((callback) => {
-      try {
-        callback(snapshot, detail);
-      } catch (error) {
-        // Prevent subscriber failures from bubbling up.
-        console.error('GameState subscriber error', error);
-      }
+    this.#emitChange('stats', detail);
+    return detail.stats;
+  }
+
+  addItem(item) {
+    const entry = cloneValue(item);
+    this.inventory.push(entry);
+
+    const detail = {
+      added: cloneValue(entry),
+      inventory: this.getInventory(),
+    };
+
+    this.#emitChange('inventory', detail);
+    return detail.inventory;
+  }
+
+  removeItem(predicateOrItem) {
+    if (predicateOrItem == null) {
+      return null;
+    }
+
+    const predicate =
+      typeof predicateOrItem === 'function'
+        ? predicateOrItem
+        : (entry) => entry === predicateOrItem;
+
+    const index = this.inventory.findIndex(predicate);
+    if (index === -1) {
+      return null;
+    }
+
+    const [removed] = this.inventory.splice(index, 1);
+    const detail = {
+      removed: cloneValue(removed),
+      inventory: this.getInventory(),
+    };
+
+    this.#emitChange('inventory', detail);
+    return removed;
+  }
+
+  equipItem(slot, item) {
+    if (typeof slot !== 'string' || slot.length === 0) {
+      throw new TypeError('slot must be a non-empty string');
+    }
+
+    const value = item == null ? null : cloneValue(item);
+    this.equipment[slot] = value;
+
+    const detail = {
+      slot,
+      item: value == null ? null : cloneValue(value),
+      equipment: this.getEquipment(),
+    };
+
+    this.#emitChange('equipment', detail);
+    return detail.equipment;
+  }
+
+  unequipItem(slot) {
+    if (typeof slot !== 'string' || slot.length === 0) {
+      throw new TypeError('slot must be a non-empty string');
+    }
+
+    if (!(slot in this.equipment)) {
+      return null;
+    }
+
+    const removed = this.equipment[slot];
+    this.equipment[slot] = null;
+
+    const detail = {
+      slot,
+      item: null,
+      removed: removed == null ? null : cloneValue(removed),
+      equipment: this.getEquipment(),
+    };
+
+    this.#emitChange('equipment', detail);
+    return removed;
+  }
+
+  learnSkill(skill) {
+    if (!skill) {
+      return false;
+    }
+
+    if (this.skills.has(skill)) {
+      return false;
+    }
+
+    this.skills.add(skill);
+
+    const detail = {
+      skill,
+      skills: this.getSkills(),
+    };
+
+    this.#emitChange('skills', detail);
+    return true;
+  }
+
+  forgetSkill(skill) {
+    if (!skill || !this.skills.has(skill)) {
+      return false;
+    }
+
+    this.skills.delete(skill);
+
+    const detail = {
+      skill,
+      skills: this.getSkills(),
+    };
+
+    this.#emitChange('skills', detail);
+    return true;
+  }
+
+  updateSaveMetadata(partialMetadata = {}) {
+    if (!partialMetadata || typeof partialMetadata !== 'object') {
+      return this.getSaveMetadata();
+    }
+
+    const updates = { ...partialMetadata };
+
+    if ('lastLocation' in updates) {
+      updates.lastLocation =
+        updates.lastLocation && typeof updates.lastLocation === 'object'
+          ? { ...updates.lastLocation }
+          : null;
+    }
+
+    this.saveMetadata = { ...this.saveMetadata, ...updates };
+
+    const detail = {
+      metadata: this.getSaveMetadata(),
+      partial: updates,
+    };
+
+    this.#emitChange('saveMetadata', detail);
+    return detail.metadata;
+  }
+
+  setLastKnownLocation(location) {
+    return this.updateSaveMetadata({
+      lastLocation:
+        location && typeof location === 'object'
+          ? { x: location.x ?? 0, y: location.y ?? 0 }
+          : null,
     });
   }
 
-  #normalizeSettings(update = {}, base = this.state.settings) {
-    const baseSettings = isPlainObject(base) ? base : DEFAULT_SETTINGS;
-    const merged = mergeWithTemplate(DEFAULT_SETTINGS, baseSettings, update);
+  setOption(key, value) {
+    if (typeof key !== 'string' || key.length === 0) {
+      throw new TypeError('option key must be a non-empty string');
+    }
 
-    return {
-      audio: normalizeAudio(merged.audio),
-      keybindings: {
-        movement: normalizeMovementBindings(merged.keybindings?.movement),
-        actions: normalizeActionBindings(merged.keybindings?.actions),
-      },
-      accessibility: normalizeAccessibility(merged.accessibility),
+    this.settings = { ...this.settings, [key]: value };
+
+    const detail = {
+      key,
+      value,
+      settings: this.getSettings(),
     };
+
+    this.#emitChange('settings', detail);
+    return detail.settings;
+  }
+
+  setOptions(options = {}) {
+    if (!options || typeof options !== 'object') {
+      return this.getSettings();
+    }
+
+    this.settings = { ...this.settings, ...options };
+
+    const detail = {
+      options: { ...options },
+      settings: this.getSettings(),
+    };
+
+    this.#emitChange('settings', detail);
+    return detail.settings;
   }
 }
+
+let instance = null;
+
+export class GameState extends ObservableState {
+  constructor() {
+    super();
+
+    if (instance) {
+      return instance;
+    }
+
+    this.playerState = new PlayerState();
+    this.playerState.subscribe('change', (change) => {
+      this._emit('playerChange', change);
+      this._emit('change', {
+        type: 'player',
+        detail: change,
+        snapshot: this.getSnapshot(),
+      });
+    });
+
+    instance = this;
+  }
+
+  static getInstance() {
+    if (!instance) {
+      instance = new GameState();
+    }
+
+    return instance;
+  }
+
+  getPlayerState() {
+    return this.playerState;
+  }
+
+  getSnapshot() {
+    return {
+      player: this.playerState.getSnapshot(),
+    };
+  }
+
+  reset(options = {}) {
+    this.playerState.reset(options);
+
+    if (options.emit !== false) {
+      this._emit('reset', this.getSnapshot());
+    }
+  }
+}
+
+export const gameState = GameState.getInstance();

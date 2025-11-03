@@ -1,241 +1,217 @@
-import { SettingsPanel } from './settings-panel.js';
+import { GameState } from '../../core/game-state.js';
+import { StatusPanel } from './status-panel.js';
 
-const clone = (value) => {
-  if (typeof globalThis.structuredClone === 'function') {
-    return globalThis.structuredClone(value);
+const ensureDocument = (doc) => {
+  if (doc) {
+    return doc;
   }
 
-  return JSON.parse(JSON.stringify(value));
+  if (typeof document !== 'undefined') {
+    return document;
+  }
+
+  throw new Error('A document-like object is required to render the game menu.');
 };
 
 export class GameMenu {
-  constructor(root, { gameState, playerController, onExit } = {}) {
-    this.root = root ?? null;
-    this.gameState = gameState ?? null;
-    this.playerController = playerController ?? null;
-    this.onExit = typeof onExit === 'function' ? onExit : null;
+  constructor(root, { gameState, document: doc, onClose } = {}) {
+    if (!root) {
+      throw new TypeError('GameMenu requires a root element to mount into.');
+    }
+
+    if (!(gameState instanceof GameState)) {
+      throw new TypeError('GameMenu requires a GameState instance.');
+    }
+
+    this.root = root;
+    this.gameState = gameState;
+    this.document = ensureDocument(doc);
+    this.onClose = typeof onClose === 'function' ? onClose : null;
 
     this.container = null;
-    this.settingsHost = null;
-    this.settingsPanel = null;
-    this.resumeButton = null;
-    this.settingsButton = null;
-    this.exitButton = null;
-
-    this.isOpen = false;
-    this.previewBaseline = null;
-    this.activePreview = null;
-
-    this.#handleWindowKeyDown = this.#handleWindowKeyDown.bind(this);
-    this.#handleContainerKeyDown = this.#handleContainerKeyDown.bind(this);
+    this.menuList = null;
+    this.panelContainer = null;
+    this.statusPanel = null;
+    this.focusIndex = 0;
+    this.menuOptions = [];
   }
 
   mount() {
-    if (!this.root || typeof document === 'undefined') {
-      return;
-    }
-
     if (this.container) {
       return;
     }
 
-    this.container = document.createElement('div');
-    this.container.className = 'game-menu';
-    this.container.setAttribute('hidden', '');
-    this.container.tabIndex = -1;
-    this.container.addEventListener('keydown', this.#handleContainerKeyDown);
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'game-menu__backdrop';
-    this.container.append(backdrop);
-
-    const content = document.createElement('div');
-    content.className = 'game-menu__content';
-
-    const nav = document.createElement('nav');
-    nav.className = 'game-menu__actions';
-
-    this.resumeButton = this.#createMenuButton('Resume', () => {
-      this.close();
-    });
-    nav.append(this.resumeButton);
-
-    this.settingsButton = this.#createMenuButton('Settings', () => {
-      this.open();
-      this.#showSettingsPanel();
-    });
-    if (!this.gameState) {
-      this.settingsButton.disabled = true;
-      this.settingsButton.title = 'Settings unavailable';
-    }
-    nav.append(this.settingsButton);
-
-    this.exitButton = this.#createMenuButton('Exit to title', () => {
-      this.close();
-      this.onExit?.();
-    });
-    nav.append(this.exitButton);
-
-    content.append(nav);
-
-    this.settingsHost = document.createElement('div');
-    this.settingsHost.className = 'game-menu__settings-host';
-    content.append(this.settingsHost);
-
-    this.container.append(content);
+    this.container = this.#createView();
     this.root.append(this.container);
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', this.#handleWindowKeyDown);
-    }
+    this.#showMenu();
   }
 
-  destroy() {
-    this.close();
-    this.#teardownSettingsPanel();
+  unmount() {
+    this.#teardownPanel();
 
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('keydown', this.#handleWindowKeyDown);
-    }
-
-    if (this.container) {
-      this.container.removeEventListener('keydown', this.#handleContainerKeyDown);
-      if (this.container.isConnected) {
-        this.container.remove();
-      }
+    if (this.container?.isConnected) {
+      this.container.remove();
     }
 
     this.container = null;
-    this.settingsHost = null;
-    this.resumeButton = null;
-    this.settingsButton = null;
-    this.exitButton = null;
+    this.menuList = null;
+    this.panelContainer = null;
+    this.menuOptions = [];
   }
 
-  open() {
-    if (!this.container) {
-      return;
-    }
+  #createView() {
+    const overlay = this.document.createElement('div');
+    overlay.className = 'game-menu';
 
-    this.container.removeAttribute('hidden');
-    this.container.classList.add('game-menu--open');
-    this.isOpen = true;
-    (this.settingsPanel ? this.settingsPanel.container : this.resumeButton)?.focus?.({
-      preventScroll: true,
+    const windowElement = this.document.createElement('div');
+    windowElement.className = 'game-menu__window';
+
+    const heading = this.document.createElement('h2');
+    heading.className = 'game-menu__title';
+    heading.textContent = 'Menu';
+
+    const content = this.document.createElement('div');
+    content.className = 'game-menu__content';
+
+    this.menuList = this.document.createElement('ul');
+    this.menuList.className = 'game-menu__options';
+
+    const options = [
+      { label: 'Status', handler: () => this.#showStatusPanel() },
+      { label: 'Items', handler: null },
+      { label: 'Equipment', handler: null },
+      { label: 'Save', handler: null },
+      { label: 'Close', handler: () => this.onClose?.() },
+    ];
+
+    this.menuOptions = options.map((option, index) => {
+      const item = this.document.createElement('li');
+      item.className = 'game-menu__option-item';
+
+      const button = this.document.createElement('button');
+      button.type = 'button';
+      button.className = 'game-menu__option';
+      button.textContent = option.label;
+      button.dataset.index = String(index);
+      button.addEventListener('click', () => {
+        this.#activateOption(index);
+      });
+
+      item.append(button);
+      this.menuList.append(item);
+
+      return { button, handler: option.handler };
     });
+
+    this.menuList.addEventListener('keydown', (event) => {
+      this.#handleKeyDown(event);
+    });
+
+    content.append(this.menuList);
+
+    this.panelContainer = this.document.createElement('div');
+    this.panelContainer.className = 'game-menu__panel';
+    content.append(this.panelContainer);
+
+    windowElement.append(heading, content);
+    overlay.append(windowElement);
+
+    return overlay;
   }
 
-  close() {
-    if (!this.container) {
+  #handleKeyDown(event) {
+    if (!this.menuOptions.length) {
       return;
     }
 
-    this.container.setAttribute('hidden', '');
-    this.container.classList.remove('game-menu--open');
-    this.isOpen = false;
-
-    if (this.settingsPanel) {
-      this.#handleSettingsCancel();
-    }
-  }
-
-  toggle() {
-    if (this.isOpen) {
-      this.close();
-    } else {
-      this.open();
-    }
-  }
-
-  #createMenuButton(label, handler) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'game-menu__button';
-    button.textContent = label;
-    button.addEventListener('click', handler);
-    return button;
-  }
-
-  #handleWindowKeyDown(event) {
-    if (event.key === 'Escape') {
-      if (this.isOpen) {
-        this.close();
-      } else {
-        this.open();
-      }
-    }
-  }
-
-  #handleContainerKeyDown(event) {
-    if (event.key === 'Escape') {
-      if (this.settingsPanel) {
+    switch (event.key) {
+      case 'ArrowUp':
+      case 'Up':
         event.preventDefault();
-        this.#handleSettingsCancel();
-      } else {
-        this.close();
-      }
+        this.#updateFocus((this.focusIndex - 1 + this.menuOptions.length) % this.menuOptions.length);
+        break;
+      case 'ArrowDown':
+      case 'Down':
+        event.preventDefault();
+        this.#updateFocus((this.focusIndex + 1) % this.menuOptions.length);
+        break;
+      case 'Enter':
+      case ' ':
+      case 'Spacebar':
+        event.preventDefault();
+        this.#activateOption(this.focusIndex);
+        break;
+      default:
+        break;
     }
   }
 
-  #showSettingsPanel() {
-    if (!this.gameState || !this.settingsHost || this.settingsPanel) {
+  #updateFocus(index) {
+    if (!this.menuOptions[index]) {
       return;
     }
 
-    this.previewBaseline = this.gameState.getSettings();
-    this.settingsPanel = new SettingsPanel(this.settingsHost, {
-      settings: this.previewBaseline,
-      onPreview: (draft) => {
-        const preview = this.gameState?.previewSettings?.(draft) ?? clone(draft);
-        this.#applyPreview(preview);
-      },
-      onSubmit: async (draft) => {
-        await this.gameState.updateSettings(draft);
-        const applied = this.gameState.getSettings();
-        this.#applyPreview(applied);
-        this.#teardownSettingsPanel();
-        this.close();
-      },
-      onCancel: () => {
-        if (this.previewBaseline) {
-          this.#applyPreview(this.previewBaseline);
-        }
-        this.#teardownSettingsPanel();
-        this.close();
-      },
-    });
+    if (this.menuOptions[this.focusIndex]) {
+      this.menuOptions[this.focusIndex].button.classList.remove('game-menu__option--active');
+    }
 
-    this.settingsPanel.mount();
+    this.focusIndex = index;
+    const entry = this.menuOptions[this.focusIndex];
+    entry.button.classList.add('game-menu__option--active');
+    entry.button.focus({ preventScroll: true });
   }
 
-  #applyPreview(settings) {
-    if (!settings) {
+  #activateOption(index) {
+    const entry = this.menuOptions[index];
+    if (!entry) {
       return;
     }
 
-    this.activePreview = settings;
+    entry.button.classList.add('game-menu__option--pressed');
 
-    const movement = settings?.keybindings?.movement;
-    if (movement && this.playerController?.setKeyBindings) {
-      this.playerController.setKeyBindings(movement);
+    if (typeof entry.handler === 'function') {
+      entry.handler();
     }
   }
 
-  #handleSettingsCancel() {
-    if (this.previewBaseline) {
-      this.#applyPreview(this.previewBaseline);
+  #showMenu() {
+    if (!this.menuList || !this.panelContainer) {
+      return;
     }
 
-    this.#teardownSettingsPanel();
+    this.menuList.hidden = false;
+    this.panelContainer.hidden = true;
+    this.panelContainer.replaceChildren();
+    this.#teardownPanel();
+
+    if (this.menuOptions.length) {
+      this.#updateFocus(0);
+    }
   }
 
-  #teardownSettingsPanel() {
-    if (this.settingsPanel) {
-      this.settingsPanel.destroy();
-      this.settingsPanel = null;
+  #showStatusPanel() {
+    if (!this.panelContainer) {
+      return;
     }
 
-    this.previewBaseline = null;
-    this.activePreview = null;
+    if (!this.statusPanel) {
+      this.statusPanel = new StatusPanel({
+        gameState: this.gameState,
+        document: this.document,
+        onClose: () => this.#showMenu(),
+      });
+    }
+
+    const element = this.statusPanel.getElement();
+    this.panelContainer.replaceChildren(element);
+    this.panelContainer.hidden = false;
+    this.menuList.hidden = true;
+  }
+
+  #teardownPanel() {
+    if (this.statusPanel) {
+      this.statusPanel.unmount();
+      this.statusPanel = null;
+    }
   }
 }

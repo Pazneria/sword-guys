@@ -1,3 +1,5 @@
+import { GameState } from './core/game-state.js';
+import { SaveManager } from './core/save-manager.js';
 import { SceneManager } from './core/scene-manager.js';
 import { GameState } from './core/game-state.js';
 import { StartingAreaScene } from './scenes/starting-area.js';
@@ -6,24 +8,47 @@ import { TitleScreen } from './scenes/title-screen.js';
 async function bootstrap() {
   const root = document.getElementById('game-root');
   const scenes = new SceneManager();
-  const gameState = new GameState();
+  const saveManager = new SaveManager();
 
-  await gameState.initialize();
+  const startStartingArea = () => {
+    const startingArea = new StartingAreaScene(root, {
+      onExit: showTitleScreen,
+      saveManager,
+    });
+    scenes.show(startingArea);
+  };
 
   const showTitleScreen = () => {
+    GameState.setScene('title-screen');
+
     const titleScreen = new TitleScreen(root, {
+      saveManager,
       onNew: () => {
-        const startingArea = new StartingAreaScene(root, {
-          onExit: showTitleScreen,
-          gameState,
-        });
-        scenes.show(startingArea);
+        GameState.reset();
+        startStartingArea();
       },
-      onContinue: () => {
-        // Continue support will be implemented once save data is available.
+      onContinue: (slot) => {
+        if (!slot?.slotId) {
+          return;
+        }
+
+        const snapshot = slot.data ?? saveManager.load(slot.slotId);
+        if (snapshot) {
+          GameState.hydrate(snapshot);
+          startStartingArea();
+        }
       },
-      onLoad: () => {
-        // Load support will be implemented once save data is available.
+      onLoad: (slots) => {
+        const target = Array.isArray(slots) && slots.length ? slots[0] : null;
+        if (!target?.slotId) {
+          return;
+        }
+
+        const snapshot = target.data ?? saveManager.load(target.slotId);
+        if (snapshot) {
+          GameState.hydrate(snapshot);
+          startStartingArea();
+        }
       },
     });
 
