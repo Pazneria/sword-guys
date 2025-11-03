@@ -1,10 +1,11 @@
 import { GameState } from './core/game-state.js';
 import { SaveManager } from './core/save-manager.js';
 import { SceneManager } from './core/scene-manager.js';
+import { GameState } from './core/game-state.js';
 import { StartingAreaScene } from './scenes/starting-area.js';
 import { TitleScreen } from './scenes/title-screen.js';
 
-function bootstrap() {
+async function bootstrap() {
   const root = document.getElementById('game-root');
   const scenes = new SceneManager();
   const saveManager = new SaveManager();
@@ -57,4 +58,8 @@ function bootstrap() {
   showTitleScreen();
 }
 
-document.addEventListener('DOMContentLoaded', bootstrap);
+document.addEventListener('DOMContentLoaded', () => {
+  bootstrap().catch((error) => {
+    console.error('Failed to bootstrap Sword Guys', error);
+  });
+});

@@ -1,13 +1,28 @@
-const DIRECTIONS = Object.freeze({
-  up: { x: 0, y: -1, keys: ['ArrowUp', 'w', 'W'] },
-  down: { x: 0, y: 1, keys: ['ArrowDown', 's', 'S'] },
-  left: { x: -1, y: 0, keys: ['ArrowLeft', 'a', 'A'] },
-  right: { x: 1, y: 0, keys: ['ArrowRight', 'd', 'D'] },
-  upRight: { x: 1, y: -1, keys: [] },
-  upLeft: { x: -1, y: -1, keys: [] },
-  downRight: { x: 1, y: 1, keys: [] },
-  downLeft: { x: -1, y: 1, keys: [] },
+const DIRECTION_VECTORS = Object.freeze({
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+  upRight: { x: 1, y: -1 },
+  upLeft: { x: -1, y: -1 },
+  downRight: { x: 1, y: 1 },
+  downLeft: { x: -1, y: 1 },
 });
+
+const MOVEMENT_BINDING_NAMES = Object.freeze(Object.keys(DIRECTION_VECTORS));
+
+const DEFAULT_KEY_BINDINGS = Object.freeze({
+  up: ['ArrowUp', 'w', 'W'],
+  down: ['ArrowDown', 's', 'S'],
+  left: ['ArrowLeft', 'a', 'A'],
+  right: ['ArrowRight', 'd', 'D'],
+  upRight: [],
+  upLeft: [],
+  downRight: [],
+  downLeft: [],
+});
+
+const LETTER_PATTERN = /^[a-z]$/i;
 
 const DIAGONAL_COMPONENTS = Object.freeze({
   upRight: ['up', 'right'],
@@ -43,22 +58,88 @@ const createTicker = (providedTicker) => {
   };
 };
 
-const buildKeyDirectionMap = () => {
-  const entries = [];
+const normalizeKeyList = (value, fallback = []) => {
+  const normalized = [];
+  const seen = new Set();
 
-  Object.entries(DIRECTIONS).forEach(([name, value]) => {
-    value.keys.forEach((key) => {
-      entries.push([key, name]);
+  const addKey = (key) => {
+    if (!key || seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    normalized.push(key);
+  };
+
+  const source = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+    ? value.split(',')
+    : [];
+
+  source.forEach((entry) => {
+    const key = typeof entry === 'string' ? entry.trim() : '';
+    if (!key) {
+      return;
+    }
+
+    addKey(key);
+
+    if (key.length === 1 && LETTER_PATTERN.test(key)) {
+      const alternate = key === key.toLowerCase() ? key.toUpperCase() : key.toLowerCase();
+      addKey(alternate);
+    }
+  });
+
+  if (!normalized.length) {
+    fallback.forEach((entry) => addKey(entry));
+  }
+
+  return normalized;
+};
+
+const cloneKeyBindings = (bindings) => {
+  const clone = {};
+  MOVEMENT_BINDING_NAMES.forEach((direction) => {
+    const keys =
+      (bindings && Array.isArray(bindings[direction]) && bindings[direction]) ||
+      DEFAULT_KEY_BINDINGS[direction] ||
+      [];
+    clone[direction] = [...keys];
+  });
+  return clone;
+};
+
+const normalizeMovementBindings = (bindings) => {
+  const source = bindings && typeof bindings === 'object' ? bindings : {};
+  const normalized = {};
+
+  MOVEMENT_BINDING_NAMES.forEach((direction) => {
+    normalized[direction] = normalizeKeyList(source[direction], DEFAULT_KEY_BINDINGS[direction]);
+  });
+
+  return normalized;
+};
+
+const buildKeyDirectionMap = (movementBindings) => {
+  const entries = [];
+  const source = movementBindings ?? DEFAULT_KEY_BINDINGS;
+
+  MOVEMENT_BINDING_NAMES.forEach((direction) => {
+    const keys = Array.isArray(source[direction]) ? source[direction] : [];
+    keys.forEach((key) => {
+      entries.push([key, direction]);
     });
   });
 
   Object.entries(DIAGONAL_COMPONENTS).forEach(([name, [first, second]]) => {
-    const firstKeys = DIRECTIONS[first]?.keys ?? [];
-    const secondKeys = DIRECTIONS[second]?.keys ?? [];
+    const firstKeys = Array.isArray(source[first]) ? source[first] : [];
+    const secondKeys = Array.isArray(source[second]) ? source[second] : [];
 
     firstKeys.forEach((primary) => {
       secondKeys.forEach((secondary) => {
-        entries.push([`${primary}${COMBO_SEPARATOR}${secondary}`, name]);
+        const combo = `${primary}${COMBO_SEPARATOR}${secondary}`;
+        entries.push([combo, name]);
         if (primary !== secondary) {
           entries.push([`${secondary}${COMBO_SEPARATOR}${primary}`, name]);
         }
@@ -93,6 +174,7 @@ export class PlayerController {
     onStep,
     onMoveComplete,
     canMoveTo,
+    keyBindings,
   } = {}) {
     this.tilePosition = {
       x: position?.x ?? 0,
@@ -122,7 +204,8 @@ export class PlayerController {
     this.#currentMove = null;
     this.#rafHandle = null;
     this.#lastTickTime = null;
-    this.#keyDirectionMap = buildKeyDirectionMap();
+    this.keyBindings = normalizeMovementBindings(keyBindings);
+    this.#keyDirectionMap = buildKeyDirectionMap(this.keyBindings);
 
   }
 
@@ -156,6 +239,18 @@ export class PlayerController {
     this.#directionQueue.length = 0;
     this.#currentMove = null;
     this.#pressedDirections.clear();
+  }
+
+  getKeyBindings() {
+    return cloneKeyBindings(this.keyBindings);
+  }
+
+  setKeyBindings(bindings) {
+    this.keyBindings = normalizeMovementBindings(bindings);
+    this.#keyDirectionMap = buildKeyDirectionMap(this.keyBindings);
+    this.#pressedDirections.clear();
+    this.#directionQueue.length = 0;
+    return this.getKeyBindings();
   }
 
   update(delta) {
@@ -292,7 +387,7 @@ export class PlayerController {
     }
 
     for (const direction of this.#pressedDirections) {
-      if (DIRECTIONS[direction]) {
+      if (DIRECTION_VECTORS[direction]) {
         return direction;
       }
     }
@@ -318,7 +413,7 @@ export class PlayerController {
   }
 
   #startMove(directionName) {
-    const direction = DIRECTIONS[directionName];
+    const direction = DIRECTION_VECTORS[directionName];
     if (!direction) {
       return false;
     }

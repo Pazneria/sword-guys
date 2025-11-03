@@ -73,6 +73,18 @@ export class StartingAreaScene {
 
     this.playerController = this.#createPlayerController(spawn);
     this.playerController.start();
+
+    this.#applyInitialSettings();
+    this.#subscribeToGameState();
+
+    if (this.gameState) {
+      this.gameMenu = new GameMenu(this.container, {
+        gameState: this.gameState,
+        playerController: this.playerController,
+        onExit: this.onExit,
+      });
+      this.gameMenu.mount();
+    }
   }
 
   unmount() {
@@ -103,6 +115,35 @@ export class StartingAreaScene {
 
     this.container = null;
     this.followDuringInterpolation = false;
+  }
+
+  #applyInitialSettings() {
+    if (!this.gameState || !this.playerController) {
+      return;
+    }
+
+    const settings = this.gameState.getSettings();
+    const movementBindings = settings?.keybindings?.movement;
+    if (movementBindings) {
+      this.playerController.setKeyBindings(movementBindings);
+    }
+  }
+
+  #subscribeToGameState() {
+    if (!this.gameState || !this.playerController) {
+      return;
+    }
+
+    this.unsubscribeFromGameState = this.gameState.subscribe((state, detail) => {
+      if (detail?.section !== 'settings') {
+        return;
+      }
+
+      const movementBindings = state?.settings?.keybindings?.movement;
+      if (movementBindings) {
+        this.playerController.setKeyBindings(movementBindings);
+      }
+    });
   }
 
   getSpawnPoint() {
@@ -246,6 +287,7 @@ export class StartingAreaScene {
       position: initialPosition,
       speed: movementSpeed,
       canMoveTo,
+      keyBindings: initialMovementBindings,
       onPositionChange: (position) => {
         if (!this.map) {
           return;
