@@ -38,6 +38,7 @@ export class CanvasTileMap {
     drawTile,
     backgroundColor = '#0f061b',
     followSmoothing = 0,
+    preloadTiles = 0,
   }) {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
@@ -47,6 +48,28 @@ export class CanvasTileMap {
     this.drawTile = typeof drawTile === 'function' ? drawTile : null;
     this.backgroundColor = backgroundColor;
     this.followSmoothing = Math.min(Math.max(followSmoothing, 0), 1);
+
+    const resolvePreloadValue = (value) => {
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue)) {
+        return 0;
+      }
+
+      return Math.max(0, Math.floor(numericValue));
+    };
+
+    this.preloadTiles = {
+      columns: resolvePreloadValue(
+        typeof preloadTiles === 'object' && preloadTiles !== null
+          ? preloadTiles.columns
+          : preloadTiles,
+      ),
+      rows: resolvePreloadValue(
+        typeof preloadTiles === 'object' && preloadTiles !== null
+          ? preloadTiles.rows
+          : preloadTiles,
+      ),
+    };
 
     this.mapHeight = this.layout.length;
     this.mapWidth = this.layout[0]?.length ?? 0;
@@ -137,10 +160,10 @@ export class CanvasTileMap {
     const right = left + this.viewportTiles.columns;
     const bottom = top + this.viewportTiles.rows;
 
-    const startX = Math.floor(left);
-    const startY = Math.floor(top);
-    const endX = Math.ceil(right);
-    const endY = Math.ceil(bottom);
+    const startX = Math.max(0, Math.floor(left) - this.preloadTiles.columns);
+    const startY = Math.max(0, Math.floor(top) - this.preloadTiles.rows);
+    const endX = Math.min(this.mapWidth, Math.ceil(right) + this.preloadTiles.columns);
+    const endY = Math.min(this.mapHeight, Math.ceil(bottom) + this.preloadTiles.rows);
 
     for (let y = startY; y < endY; y += 1) {
       for (let x = startX; x < endX; x += 1) {
