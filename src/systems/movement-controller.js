@@ -3,6 +3,10 @@ const DEFAULT_DELTAS = Object.freeze({
   down: { x: 0, y: 1 },
   left: { x: -1, y: 0 },
   right: { x: 1, y: 0 },
+  upRight: { x: 1, y: -1 },
+  upLeft: { x: -1, y: -1 },
+  downRight: { x: 1, y: 1 },
+  downLeft: { x: -1, y: 1 },
 });
 
 const clonePosition = (position) => {

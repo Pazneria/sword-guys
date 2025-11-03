@@ -166,18 +166,42 @@ export class StartingAreaScene {
       this.config.tiles.ROCK,
     ]);
 
-    const canMoveTo = ({ x, y }) => {
+    const isTilePassable = ({ x, y }) => {
       const row = this.config.layout[y];
       if (!row) {
         return false;
       }
 
       const tile = row[x];
-      if (!tile) {
+      if (tile == null) {
         return false;
       }
 
       return !blockedTiles.has(tile);
+    };
+
+    const canMoveTo = (target, _directionName, from) => {
+      if (!target || !isTilePassable(target)) {
+        return false;
+      }
+
+      const origin = from ?? this.playerController?.tilePosition ?? null;
+
+      if (origin) {
+        const deltaX = target.x - origin.x;
+        const deltaY = target.y - origin.y;
+
+        if (Math.abs(deltaX) === 1 && Math.abs(deltaY) === 1) {
+          const horizontal = { x: origin.x + deltaX, y: origin.y };
+          const vertical = { x: origin.x, y: origin.y + deltaY };
+
+          if (!isTilePassable(horizontal) || !isTilePassable(vertical)) {
+            return false;
+          }
+        }
+      }
+
+      return true;
     };
 
     return new PlayerController({
