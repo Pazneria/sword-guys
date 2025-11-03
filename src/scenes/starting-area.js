@@ -2,6 +2,7 @@ import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
 import { GameState } from '../core/game-state.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
+import { GameMenu } from '../ui/components/game-menu.js';
 
 export class StartingAreaScene {
   #handleControllerInterpolate = (event) => {
@@ -34,6 +35,12 @@ export class StartingAreaScene {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
+    this.document =
+      providedDocument ??
+      (typeof globalThis.document !== 'undefined' ? globalThis.document : null);
+    this.window =
+      providedWindow ??
+      (typeof globalThis.window !== 'undefined' ? globalThis.window : null);
     this.container = null;
     this.map = null;
     this.playerController = null;
@@ -60,15 +67,26 @@ export class StartingAreaScene {
   }
 
   unmount() {
-    if (this.playerController) {
-      this.playerController.stop();
-      this.playerController = null;
+    if (this.window && typeof this.window.removeEventListener === 'function') {
+      this.window.removeEventListener('keydown', this.#handleGlobalKeyDown);
     }
 
-    if (this.map) {
-      this.map.destroy();
-      this.map = null;
+    if (this.gameMenu) {
+      this.gameMenu.destroy();
+      this.gameMenu = null;
     }
+
+    if (this.playerController && typeof this.playerController.stop === 'function') {
+      this.playerController.stop();
+    }
+    this.playerController = null;
+    this.playerControllerActive = false;
+    this.playerPausedForMenu = false;
+
+    if (this.map && typeof this.map.destroy === 'function') {
+      this.map.destroy();
+    }
+    this.map = null;
 
     if (this.container?.isConnected) {
       this.container.remove();
@@ -262,27 +280,34 @@ export class StartingAreaScene {
   }
 
   #createView() {
-    const container = document.createElement('div');
+    const doc =
+      this.document ?? (typeof document !== 'undefined' ? document : null);
+
+    if (!doc) {
+      throw new Error('StartingAreaScene requires a document to render.');
+    }
+
+    const container = doc.createElement('div');
     container.className = 'starting-area scene';
 
-    const canvas = document.createElement('canvas');
+    const canvas = doc.createElement('canvas');
     canvas.className = 'starting-area__canvas';
     container.append(canvas);
 
-    const overlay = document.createElement('div');
+    const overlay = doc.createElement('div');
     overlay.className = 'starting-area__overlay';
 
-    const heading = document.createElement('h2');
+    const heading = doc.createElement('h2');
     heading.className = 'starting-area__title';
     heading.textContent = 'Starting Area';
 
     overlay.append(heading);
 
     if (typeof this.onExit === 'function') {
-      const controls = document.createElement('div');
+      const controls = doc.createElement('div');
       controls.className = 'starting-area__controls';
 
-      const exitButton = document.createElement('button');
+      const exitButton = doc.createElement('button');
       exitButton.type = 'button';
       exitButton.className = 'starting-area__button';
       exitButton.textContent = 'Return to Title';
