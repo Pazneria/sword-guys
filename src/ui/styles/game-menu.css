@@ -1,0 +1,108 @@
+.game-menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: radial-gradient(circle at top, rgba(30, 18, 60, 0.85), rgba(10, 5, 24, 0.9));
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 160ms ease, visibility 160ms ease;
+  z-index: 30;
+}
+
+.game-menu--visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.game-menu__panel {
+  width: min(22rem, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: linear-gradient(160deg, rgba(44, 24, 95, 0.95), rgba(25, 12, 55, 0.95));
+  border: 2px solid rgba(251, 210, 123, 0.45);
+  border-radius: 0.85rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  color: #fdf6e3;
+}
+
+.game-menu__title {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-align: center;
+}
+
+.game-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.game-menu__list-item {
+  margin: 0;
+  padding: 0;
+}
+
+.game-menu__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: rgba(71, 41, 132, 0.65);
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.game-menu__item:hover,
+.game-menu__item:focus-visible {
+  background: rgba(114, 70, 198, 0.85);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(251, 210, 123, 0.45), 0 12px 24px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.game-menu__item:active {
+  transform: translateY(0);
+}
+
+.game-menu__item::after {
+  content: '\203A';
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.game-menu__item:focus-visible::after,
+.game-menu__item:hover::after {
+  opacity: 0.9;
+  transform: translateX(0);
+}
+
+@media (max-width: 640px) {
+  .game-menu {
+    padding: 1.25rem;
+  }
+
+  .game-menu__panel {
+    width: 100%;
+  }
+}

@@ -2,6 +2,7 @@ import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
 import { GameState } from '../core/game-state.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
+import { GameMenu } from '../ui/components/game-menu.js';
 
 export class StartingAreaScene {
   #handleControllerInterpolate = (event) => {
@@ -27,18 +28,24 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  constructor(root, { config = STARTING_AREA_CONFIG, onExit, saveManager } = {}) {
+  constructor(
+    root,
+    { config = STARTING_AREA_CONFIG, onExit, gameState = GameState.getInstance() } = {},
+  ) {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
-    this.saveManager = saveManager ?? null;
+    this.document =
+      providedDocument ??
+      (typeof globalThis.document !== 'undefined' ? globalThis.document : null);
+    this.window =
+      providedWindow ??
+      (typeof globalThis.window !== 'undefined' ? globalThis.window : null);
     this.container = null;
     this.map = null;
     this.playerController = null;
-    this.playerStartPosition = { ...this.config.spawn };
-    this.lastSelectedSlot = 'slot-1';
-    this.saveElements = { slotSelect: null, message: null, button: null };
-    this.saveMessageTimer = null;
+    this.gameState = gameState;
+    this.playerState = this.gameState.getPlayerState();
   }
 
   mount() {
@@ -57,29 +64,38 @@ export class StartingAreaScene {
     const canvas = this.container.querySelector('.starting-area__canvas');
     this.map = this.#createMap(canvas);
     this.followDuringInterpolation = this.map.followSmoothing > 0;
-    this.map.setCameraTarget(this.playerStartPosition);
-    this.map.setPlayerPosition(this.playerStartPosition);
+    const spawn = this.#resolveSpawnPoint();
+    this.map.setCameraTarget(spawn);
+    this.map.setPlayerPosition(spawn);
     this.map.start();
 
-    this.playerController = this.#createPlayerController();
+    this.playerState.setLastKnownLocation(spawn);
+
+    this.playerController = this.#createPlayerController(spawn);
     this.playerController.start();
   }
 
   unmount() {
-    if (this.saveMessageTimer) {
-      clearTimeout(this.saveMessageTimer);
-      this.saveMessageTimer = null;
+    if (this.window && typeof this.window.removeEventListener === 'function') {
+      this.window.removeEventListener('keydown', this.#handleGlobalKeyDown);
     }
 
-    if (this.playerController) {
+    if (this.gameMenu) {
+      this.gameMenu.destroy();
+      this.gameMenu = null;
+    }
+
+    if (this.playerController && typeof this.playerController.stop === 'function') {
       this.playerController.stop();
-      this.playerController = null;
     }
+    this.playerController = null;
+    this.playerControllerActive = false;
+    this.playerPausedForMenu = false;
 
-    if (this.map) {
+    if (this.map && typeof this.map.destroy === 'function') {
       this.map.destroy();
-      this.map = null;
     }
+    this.map = null;
 
     if (this.container?.isConnected) {
       this.container.remove();
@@ -178,7 +194,7 @@ export class StartingAreaScene {
     });
   }
 
-  #createPlayerController() {
+  #createPlayerController(spawnPosition) {
     const movementSpeed = 6; // tiles per second
     const blockedTiles = new Set([
       this.config.tiles.TREE,
@@ -224,8 +240,10 @@ export class StartingAreaScene {
       return true;
     };
 
+    const initialPosition = spawnPosition ?? this.config.spawn;
+
     return new PlayerController({
-      position: this.playerStartPosition,
+      position: initialPosition,
       speed: movementSpeed,
       canMoveTo,
       onPositionChange: (position) => {
@@ -251,22 +269,45 @@ export class StartingAreaScene {
 
         const redraw = !this.followDuringInterpolation;
         this.map.setCameraTarget({ ...tilePosition }, { redraw });
+
+        this.playerState.setLastKnownLocation(nextPosition);
       },
     });
   }
 
+  #resolveSpawnPoint() {
+    const lastKnown = this.playerState?.getLastKnownLocation?.();
+
+    if (
+      lastKnown &&
+      Number.isFinite(lastKnown.x) &&
+      Number.isFinite(lastKnown.y)
+    ) {
+      return { x: lastKnown.x, y: lastKnown.y };
+    }
+
+    return { ...this.config.spawn };
+  }
+
   #createView() {
-    const container = document.createElement('div');
+    const doc =
+      this.document ?? (typeof document !== 'undefined' ? document : null);
+
+    if (!doc) {
+      throw new Error('StartingAreaScene requires a document to render.');
+    }
+
+    const container = doc.createElement('div');
     container.className = 'starting-area scene';
 
-    const canvas = document.createElement('canvas');
+    const canvas = doc.createElement('canvas');
     canvas.className = 'starting-area__canvas';
     container.append(canvas);
 
-    const overlay = document.createElement('div');
+    const overlay = doc.createElement('div');
     overlay.className = 'starting-area__overlay';
 
-    const heading = document.createElement('h2');
+    const heading = doc.createElement('h2');
     heading.className = 'starting-area__title';
     heading.textContent = 'Starting Area';
 
@@ -277,10 +318,10 @@ export class StartingAreaScene {
     }
 
     if (typeof this.onExit === 'function') {
-      const controls = document.createElement('div');
+      const controls = doc.createElement('div');
       controls.className = 'starting-area__controls';
 
-      const exitButton = document.createElement('button');
+      const exitButton = doc.createElement('button');
       exitButton.type = 'button';
       exitButton.className = 'starting-area__button';
       exitButton.textContent = 'Return to Title';
