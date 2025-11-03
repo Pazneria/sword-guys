@@ -97,9 +97,6 @@ export class PlayerController {
     this.#lastTickTime = null;
     this.#keyDirectionMap = buildKeyDirectionMap();
 
-    this.#handleKeyDown = this.#handleKeyDown.bind(this);
-    this.#handleKeyUp = this.#handleKeyUp.bind(this);
-    this.#tick = this.#tick.bind(this);
   }
 
   start() {
@@ -176,7 +173,7 @@ export class PlayerController {
     }
   }
 
-  #tick(time) {
+  #tick = (time) => {
     if (this.#rafHandle === null) {
       return;
     }
@@ -185,9 +182,9 @@ export class PlayerController {
     this.#lastTickTime = time;
     this.update(delta);
     this.#rafHandle = this.#ticker.request(this.#tick);
-  }
+  };
 
-  #handleKeyDown(event) {
+  #handleKeyDown = (event) => {
     const direction = this.#keyDirectionMap.get(event.key);
     if (!direction) {
       return;
@@ -202,9 +199,9 @@ export class PlayerController {
     this.#pressedDirections.add(direction);
     this.#directionQueue.push(direction);
     this.#processQueue();
-  }
+  };
 
-  #handleKeyUp(event) {
+  #handleKeyUp = (event) => {
     const direction = this.#keyDirectionMap.get(event.key);
     if (!direction) {
       return;
@@ -212,7 +209,7 @@ export class PlayerController {
 
     event.preventDefault();
     this.#pressedDirections.delete(direction);
-  }
+  };
 
   #processQueue() {
     while (!this.#currentMove && this.#directionQueue.length > 0) {
