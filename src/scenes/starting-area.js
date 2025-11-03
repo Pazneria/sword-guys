@@ -1,6 +1,7 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
+import { GameMenu } from '../ui/components/game-menu.js';
 
 export class StartingAreaScene {
   #handleControllerInterpolate = (event) => {
@@ -26,13 +27,104 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
+  #handleGlobalKeyDown = (event) => {
+    if (!this.gameMenu) {
+      return;
+    }
+
+    const key = event?.key;
+    if (typeof key !== 'string') {
+      return;
+    }
+
+    const isToggleKey = key === 'e' || key === 'E';
+    if (isToggleKey) {
+      if (event?.repeat) {
+        return;
+      }
+
+      event?.preventDefault?.();
+      if (this.gameMenu.isVisible()) {
+        this.gameMenu.hide();
+      } else {
+        this.gameMenu.show();
+      }
+      return;
+    }
+
+    if (key === 'Escape' && this.gameMenu.isVisible()) {
+      event?.preventDefault?.();
+      this.gameMenu.hide();
+    }
+  };
+
+  #handleMenuShown = () => {
+    if (this.playerController && this.playerControllerActive) {
+      this.playerController.stop();
+      this.playerControllerActive = false;
+      this.playerPausedForMenu = true;
+    }
+  };
+
+  #handleMenuHidden = () => {
+    if (this.playerController && this.playerPausedForMenu && !this.playerControllerActive) {
+      this.playerController.start();
+      this.playerControllerActive = true;
+    }
+
+    this.playerPausedForMenu = false;
+  };
+
+  #handleMenuSelect = (value) => {
+    if (value === 'return-to-title') {
+      this.gameMenu?.hide();
+      if (typeof this.onExit === 'function') {
+        this.onExit();
+      }
+    }
+  };
+
+  constructor(
+    root,
+    {
+      config = STARTING_AREA_CONFIG,
+      onExit,
+      document: providedDocument,
+      window: providedWindow,
+      factories,
+    } = {},
+  ) {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
+    this.document =
+      providedDocument ??
+      (typeof globalThis.document !== 'undefined' ? globalThis.document : null);
+    this.window =
+      providedWindow ??
+      (typeof globalThis.window !== 'undefined' ? globalThis.window : null);
     this.container = null;
     this.map = null;
     this.playerController = null;
+    this.gameMenu = null;
+    this.playerControllerActive = false;
+    this.playerPausedForMenu = false;
+
+    const resolvedFactories = factories ?? {};
+    this.factories = {
+      createMap:
+        typeof resolvedFactories.createMap === 'function'
+          ? resolvedFactories.createMap
+          : (canvas) => this.#createMap(canvas),
+      createPlayerController:
+        typeof resolvedFactories.createPlayerController === 'function'
+          ? resolvedFactories.createPlayerController
+          : () => this.#createPlayerController(),
+      createGameMenu:
+        typeof resolvedFactories.createGameMenu === 'function'
+          ? resolvedFactories.createGameMenu
+          : (options = {}) => new GameMenu({ document: this.document, ...options }),
+    };
   }
 
   mount() {
@@ -40,26 +132,57 @@ export class StartingAreaScene {
     this.root.replaceChildren(this.container);
 
     const canvas = this.container.querySelector('.starting-area__canvas');
-    this.map = this.#createMap(canvas);
-    this.followDuringInterpolation = this.map.followSmoothing > 0;
-    this.map.setCameraTarget(this.config.spawn);
-    this.map.setPlayerPosition(this.config.spawn);
-    this.map.start();
+    this.map = this.factories.createMap(canvas);
+    this.followDuringInterpolation = Boolean(this.map?.followSmoothing > 0);
+    this.map?.setCameraTarget?.(this.config.spawn);
+    this.map?.setPlayerPosition?.(this.config.spawn);
+    this.map?.start?.();
 
-    this.playerController = this.#createPlayerController();
-    this.playerController.start();
+    this.playerController = this.factories.createPlayerController();
+    if (this.playerController && typeof this.playerController.start === 'function') {
+      this.playerController.start();
+      this.playerControllerActive = true;
+    } else {
+      this.playerControllerActive = false;
+    }
+
+    this.gameMenu = this.factories.createGameMenu({
+      document: this.document,
+      onSelect: this.#handleMenuSelect,
+      onShow: this.#handleMenuShown,
+      onHide: this.#handleMenuHidden,
+    });
+
+    if (this.gameMenu?.element) {
+      this.container.append(this.gameMenu.element);
+    }
+
+    if (this.window && typeof this.window.addEventListener === 'function') {
+      this.window.addEventListener('keydown', this.#handleGlobalKeyDown);
+    }
   }
 
   unmount() {
-    if (this.playerController) {
-      this.playerController.stop();
-      this.playerController = null;
+    if (this.window && typeof this.window.removeEventListener === 'function') {
+      this.window.removeEventListener('keydown', this.#handleGlobalKeyDown);
     }
 
-    if (this.map) {
-      this.map.destroy();
-      this.map = null;
+    if (this.gameMenu) {
+      this.gameMenu.destroy();
+      this.gameMenu = null;
     }
+
+    if (this.playerController && typeof this.playerController.stop === 'function') {
+      this.playerController.stop();
+    }
+    this.playerController = null;
+    this.playerControllerActive = false;
+    this.playerPausedForMenu = false;
+
+    if (this.map && typeof this.map.destroy === 'function') {
+      this.map.destroy();
+    }
+    this.map = null;
 
     if (this.container?.isConnected) {
       this.container.remove();
@@ -235,27 +358,34 @@ export class StartingAreaScene {
   }
 
   #createView() {
-    const container = document.createElement('div');
+    const doc =
+      this.document ?? (typeof document !== 'undefined' ? document : null);
+
+    if (!doc) {
+      throw new Error('StartingAreaScene requires a document to render.');
+    }
+
+    const container = doc.createElement('div');
     container.className = 'starting-area scene';
 
-    const canvas = document.createElement('canvas');
+    const canvas = doc.createElement('canvas');
     canvas.className = 'starting-area__canvas';
     container.append(canvas);
 
-    const overlay = document.createElement('div');
+    const overlay = doc.createElement('div');
     overlay.className = 'starting-area__overlay';
 
-    const heading = document.createElement('h2');
+    const heading = doc.createElement('h2');
     heading.className = 'starting-area__title';
     heading.textContent = 'Starting Area';
 
     overlay.append(heading);
 
     if (typeof this.onExit === 'function') {
-      const controls = document.createElement('div');
+      const controls = doc.createElement('div');
       controls.className = 'starting-area__controls';
 
-      const exitButton = document.createElement('button');
+      const exitButton = doc.createElement('button');
       exitButton.type = 'button';
       exitButton.className = 'starting-area__button';
       exitButton.textContent = 'Return to Title';
