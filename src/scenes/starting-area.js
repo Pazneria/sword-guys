@@ -1,6 +1,7 @@
 import { STARTING_AREA_CONFIG } from '../config/starting-area.js';
 import { CanvasTileMap } from '../systems/canvas-tile-map.js';
 import { PlayerController } from '../systems/player-controller.js';
+import { GameMenu } from '../ui/components/game-menu.js';
 
 export class StartingAreaScene {
   #handleControllerInterpolate = (event) => {
@@ -26,13 +27,16 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  constructor(root, { config = STARTING_AREA_CONFIG, onExit } = {}) {
+  constructor(root, { config = STARTING_AREA_CONFIG, onExit, gameState } = {}) {
     this.root = root;
     this.config = config;
     this.onExit = onExit;
+    this.gameState = gameState ?? null;
     this.container = null;
     this.map = null;
     this.playerController = null;
+    this.gameMenu = null;
+    this.unsubscribeFromGameState = null;
   }
 
   mount() {
@@ -48,9 +52,31 @@ export class StartingAreaScene {
 
     this.playerController = this.#createPlayerController();
     this.playerController.start();
+
+    this.#applyInitialSettings();
+    this.#subscribeToGameState();
+
+    if (this.gameState) {
+      this.gameMenu = new GameMenu(this.container, {
+        gameState: this.gameState,
+        playerController: this.playerController,
+        onExit: this.onExit,
+      });
+      this.gameMenu.mount();
+    }
   }
 
   unmount() {
+    if (this.unsubscribeFromGameState) {
+      this.unsubscribeFromGameState();
+      this.unsubscribeFromGameState = null;
+    }
+
+    if (this.gameMenu) {
+      this.gameMenu.destroy();
+      this.gameMenu = null;
+    }
+
     if (this.playerController) {
       this.playerController.stop();
       this.playerController = null;
@@ -67,6 +93,35 @@ export class StartingAreaScene {
 
     this.container = null;
     this.followDuringInterpolation = false;
+  }
+
+  #applyInitialSettings() {
+    if (!this.gameState || !this.playerController) {
+      return;
+    }
+
+    const settings = this.gameState.getSettings();
+    const movementBindings = settings?.keybindings?.movement;
+    if (movementBindings) {
+      this.playerController.setKeyBindings(movementBindings);
+    }
+  }
+
+  #subscribeToGameState() {
+    if (!this.gameState || !this.playerController) {
+      return;
+    }
+
+    this.unsubscribeFromGameState = this.gameState.subscribe((state, detail) => {
+      if (detail?.section !== 'settings') {
+        return;
+      }
+
+      const movementBindings = state?.settings?.keybindings?.movement;
+      if (movementBindings) {
+        this.playerController.setKeyBindings(movementBindings);
+      }
+    });
   }
 
   getSpawnPoint() {
@@ -204,10 +259,13 @@ export class StartingAreaScene {
       return true;
     };
 
+    const initialMovementBindings = this.gameState?.getSettings()?.keybindings?.movement;
+
     return new PlayerController({
       position: this.config.spawn,
       speed: movementSpeed,
       canMoveTo,
+      keyBindings: initialMovementBindings,
       onPositionChange: (position) => {
         if (!this.map) {
           return;

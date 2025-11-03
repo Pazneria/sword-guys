@@ -2,51 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { PlayerController } from '../src/systems/player-controller.js';
-
-const createWindowStub = () => {
-  const listeners = new Map();
-
-  return {
-    addEventListener(type, handler) {
-      const existing = listeners.get(type);
-      if (existing) {
-        existing.push(handler);
-      } else {
-        listeners.set(type, [handler]);
-      }
-    },
-    removeEventListener(type, handler) {
-      const existing = listeners.get(type);
-      if (!existing) {
-        return;
-      }
-
-      const index = existing.indexOf(handler);
-      if (index >= 0) {
-        existing.splice(index, 1);
-      }
-    },
-    dispatchEvent(type, event) {
-      const handlers = listeners.get(type);
-      if (!handlers) {
-        return;
-      }
-
-      handlers.slice().forEach((handler) => handler(event));
-    },
-  };
-};
-
-const createTickerStub = () => ({
-  request: () => 1,
-  cancel: () => {},
-});
-
-const createKeyboardEvent = (key) => ({
-  key,
-  repeat: false,
-  preventDefault() {},
-});
+import { GameState } from '../src/core/game-state.js';
+import {
+  createKeyboardEvent,
+  createTickerStub,
+  createWindowStub,
+} from './helpers/controller-stubs.js';
+import { createStorageStub } from './helpers/storage-stub.js';
 
 test('player controller supports diagonal moves with combined input', () => {
   const previousWindow = global.window;
@@ -143,6 +105,55 @@ test('diagonal moves are skipped when movement callback rejects due to corner bl
   } finally {
     windowStub.dispatchEvent('keyup', createKeyboardEvent('ArrowUp'));
     windowStub.dispatchEvent('keyup', createKeyboardEvent('ArrowRight'));
+    controller.stop();
+    global.window = previousWindow;
+  }
+});
+
+test('player controller updates bindings when game state settings change', async () => {
+  const previousWindow = global.window;
+  const windowStub = createWindowStub();
+  global.window = windowStub;
+
+  const storage = createStorageStub();
+  const gameState = new GameState({ storage });
+  await gameState.initialize();
+
+  const controller = new PlayerController({
+    speed: 1,
+    ticker: createTickerStub(),
+    keyBindings: gameState.getSettings().keybindings.movement,
+  });
+
+  const unsubscribe = gameState.subscribe((state, detail) => {
+    if (detail?.section === 'settings') {
+      controller.setKeyBindings(state.settings.keybindings.movement);
+    }
+  });
+
+  try {
+    controller.start();
+
+    windowStub.dispatchEvent('keydown', createKeyboardEvent('ArrowUp'));
+    controller.update(controller.moveDuration);
+    assert.deepEqual(controller.tilePosition, { x: 0, y: -1 });
+    windowStub.dispatchEvent('keyup', createKeyboardEvent('ArrowUp'));
+
+    await gameState.updateSettings({
+      keybindings: {
+        movement: {
+          up: ['i'],
+        },
+      },
+    });
+
+    windowStub.dispatchEvent('keydown', createKeyboardEvent('i'));
+    controller.update(controller.moveDuration);
+    assert.deepEqual(controller.tilePosition, { x: 0, y: -2 });
+  } finally {
+    windowStub.dispatchEvent('keyup', createKeyboardEvent('ArrowUp'));
+    windowStub.dispatchEvent('keyup', createKeyboardEvent('i'));
+    unsubscribe();
     controller.stop();
     global.window = previousWindow;
   }
