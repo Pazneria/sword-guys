@@ -33,7 +33,6 @@ export class StartingAreaScene {
     this.container = null;
     this.map = null;
     this.playerController = null;
-    this.followDuringInterpolation = false;
   }
 
   mount() {
@@ -47,34 +46,13 @@ export class StartingAreaScene {
     this.map.setPlayerPosition(this.config.spawn);
     this.map.start();
 
-    this.playerController = new PlayerController({
-      layout: this.config.layout,
-      start: this.config.spawn,
-    });
-
-    this.playerController.addEventListener(
-      'interpolate',
-      this.#handleControllerInterpolate,
-    );
-    this.playerController.addEventListener(
-      'tileenter',
-      this.#handleControllerTileEnter,
-    );
-
+    this.playerController = this.#createPlayerController();
     this.playerController.start();
   }
 
   unmount() {
     if (this.playerController) {
-      this.playerController.removeEventListener(
-        'interpolate',
-        this.#handleControllerInterpolate,
-      );
-      this.playerController.removeEventListener(
-        'tileenter',
-        this.#handleControllerTileEnter,
-      );
-      this.playerController.destroy();
+      this.playerController.stop();
       this.playerController = null;
     }
 
@@ -176,6 +154,42 @@ export class StartingAreaScene {
       drawTile,
       backgroundColor: '#120721',
       followSmoothing: 0.2,
+    });
+  }
+
+  #createPlayerController() {
+    const movementSpeed = 6; // tiles per second
+    const blockedTiles = new Set([
+      this.config.tiles.TREE,
+      this.config.tiles.WATER,
+      this.config.tiles.ROCK,
+    ]);
+
+    const canMoveTo = ({ x, y }) => {
+      const row = this.config.layout[y];
+      if (!row) {
+        return false;
+      }
+
+      const tile = row[x];
+      if (!tile) {
+        return false;
+      }
+
+      return !blockedTiles.has(tile);
+    };
+
+    return new PlayerController({
+      position: this.config.spawn,
+      speed: movementSpeed,
+      canMoveTo,
+      onPositionChange: (position) => {
+        this.map?.setPlayerPosition({ ...position });
+      },
+      onStep: (tilePosition) => {
+        this.map?.setPlayerPosition({ ...tilePosition });
+        this.map?.setCameraTarget({ ...tilePosition });
+      },
     });
   }
 

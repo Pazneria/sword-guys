@@ -98,9 +98,12 @@ export class CanvasTileMap {
       return;
     }
 
+    const hasIntegerCoordinates =
+      Number.isInteger(tilePosition.x) && Number.isInteger(tilePosition.y);
+
     this.playerPosition = {
-      x: tilePosition.x + 0.5,
-      y: tilePosition.y + 0.5,
+      x: hasIntegerCoordinates ? tilePosition.x + 0.5 : tilePosition.x,
+      y: hasIntegerCoordinates ? tilePosition.y + 0.5 : tilePosition.y,
     };
 
     if (redraw) {

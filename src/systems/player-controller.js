@@ -1,264 +1,265 @@
-const KEY_TO_DIRECTION = Object.freeze({
-  ArrowUp: 'up',
-  KeyW: 'up',
-  ArrowDown: 'down',
-  KeyS: 'down',
-  ArrowLeft: 'left',
-  KeyA: 'left',
-  ArrowRight: 'right',
-  KeyD: 'right',
+const DIRECTIONS = Object.freeze({
+  up: { x: 0, y: -1, keys: ['ArrowUp', 'w', 'W'] },
+  down: { x: 0, y: 1, keys: ['ArrowDown', 's', 'S'] },
+  left: { x: -1, y: 0, keys: ['ArrowLeft', 'a', 'A'] },
+  right: { x: 1, y: 0, keys: ['ArrowRight', 'd', 'D'] },
 });
 
-const DIRECTION_VECTORS = Object.freeze({
-  up: { x: 0, y: -1 },
-  down: { x: 0, y: 1 },
-  left: { x: -1, y: 0 },
-  right: { x: 1, y: 0 },
-});
+const DEFAULT_SPEED_TILES_PER_SECOND = 6;
 
-const DEFAULT_PASSABLE_TILES = new Set(['grass', 'path', 'spawn']);
+const now = () =>
+  typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
 
-const clamp01 = (value) => {
-  if (Number.isNaN(value) || !Number.isFinite(value)) {
-    return 0;
+const createTicker = (providedTicker) => {
+  if (providedTicker) {
+    return providedTicker;
   }
 
-  if (value <= 0) {
-    return 0;
+  if (typeof window !== 'undefined') {
+    return {
+      request: (callback) => window.requestAnimationFrame(callback),
+      cancel: (handle) => window.cancelAnimationFrame(handle),
+    };
   }
 
-  if (value >= 1) {
-    return 1;
-  }
-
-  return value;
+  return {
+    request: (callback) => setTimeout(() => callback(now()), 16),
+    cancel: (handle) => clearTimeout(handle),
+  };
 };
 
-export class PlayerController extends EventTarget {
-  #animationFrame = null;
+const buildKeyDirectionMap = () => {
+  const entries = [];
 
-  #handleKeyDown = (event) => {
-    const direction = KEY_TO_DIRECTION[event.code];
+  Object.entries(DIRECTIONS).forEach(([name, value]) => {
+    value.keys.forEach((key) => {
+      entries.push([key, name]);
+    });
+  });
+
+  return new Map(entries);
+};
+
+export class PlayerController {
+  #ticker;
+
+  #pressedDirections;
+
+  #directionQueue;
+
+  #currentMove;
+
+  #rafHandle;
+
+  #lastTickTime;
+
+  #keyDirectionMap;
+
+  constructor({
+    position = { x: 0, y: 0 },
+    speed = DEFAULT_SPEED_TILES_PER_SECOND,
+    ticker,
+    onMoveStart,
+    onPositionChange,
+    onStep,
+    onMoveComplete,
+    canMoveTo,
+  } = {}) {
+    this.tilePosition = {
+      x: position?.x ?? 0,
+      y: position?.y ?? 0,
+    };
+
+    this.position = {
+      x: position?.x ?? 0,
+      y: position?.y ?? 0,
+    };
+
+    this.speed = Math.max(0.1, speed ?? DEFAULT_SPEED_TILES_PER_SECOND);
+    this.moveDuration = 1000 / this.speed;
+
+    this.callbacks = {
+      onMoveStart: typeof onMoveStart === 'function' ? onMoveStart : null,
+      onPositionChange: typeof onPositionChange === 'function' ? onPositionChange : null,
+      onStep: typeof onStep === 'function' ? onStep : null,
+      onMoveComplete: typeof onMoveComplete === 'function' ? onMoveComplete : null,
+    };
+
+    this.canMoveTo = typeof canMoveTo === 'function' ? canMoveTo : null;
+
+    this.#ticker = createTicker(ticker);
+    this.#pressedDirections = new Set();
+    this.#directionQueue = [];
+    this.#currentMove = null;
+    this.#rafHandle = null;
+    this.#lastTickTime = null;
+    this.#keyDirectionMap = buildKeyDirectionMap();
+
+    this.#handleKeyDown = this.#handleKeyDown.bind(this);
+    this.#handleKeyUp = this.#handleKeyUp.bind(this);
+    this.#tick = this.#tick.bind(this);
+  }
+
+  start() {
+    if (this.#rafHandle !== null) {
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', this.#handleKeyDown);
+      window.addEventListener('keyup', this.#handleKeyUp);
+    }
+
+    this.#lastTickTime = now();
+    this.callbacks.onPositionChange?.({ ...this.position }, 0);
+    this.#rafHandle = this.#ticker.request(this.#tick);
+  }
+
+  stop() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('keydown', this.#handleKeyDown);
+      window.removeEventListener('keyup', this.#handleKeyUp);
+    }
+
+    if (this.#rafHandle !== null) {
+      this.#ticker.cancel(this.#rafHandle);
+      this.#rafHandle = null;
+    }
+
+    this.#lastTickTime = null;
+    this.#directionQueue.length = 0;
+    this.#currentMove = null;
+    this.#pressedDirections.clear();
+  }
+
+  update(delta) {
+    if (delta <= 0) {
+      return;
+    }
+
+    if (!this.#currentMove) {
+      this.#processQueue();
+    }
+
+    if (!this.#currentMove) {
+      return;
+    }
+
+    this.#currentMove.elapsed += delta;
+
+    const progress = Math.min(1, this.#currentMove.elapsed / this.#currentMove.duration);
+    const { from, to } = this.#currentMove;
+
+    this.position.x = from.x + (to.x - from.x) * progress;
+    this.position.y = from.y + (to.y - from.y) * progress;
+
+    this.callbacks.onPositionChange?.({ ...this.position }, progress, {
+      direction: this.#currentMove.direction,
+      from,
+      to,
+    });
+
+    if (progress >= 1) {
+      this.tilePosition = { ...to };
+      const completedMove = this.#currentMove;
+      this.#currentMove = null;
+      this.callbacks.onStep?.({ ...this.tilePosition }, completedMove.direction);
+      this.callbacks.onMoveComplete?.({ ...this.tilePosition }, completedMove.direction);
+
+      if (this.#pressedDirections.has(completedMove.direction)) {
+        this.#directionQueue.push(completedMove.direction);
+      }
+
+      this.#processQueue();
+    }
+  }
+
+  #tick(time) {
+    if (this.#rafHandle === null) {
+      return;
+    }
+
+    const delta = time - (this.#lastTickTime ?? time);
+    this.#lastTickTime = time;
+    this.update(delta);
+    this.#rafHandle = this.#ticker.request(this.#tick);
+  }
+
+  #handleKeyDown(event) {
+    const direction = this.#keyDirectionMap.get(event.key);
+    if (!direction) {
+      return;
+    }
+
+    if (event.repeat) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+    this.#pressedDirections.add(direction);
+    this.#directionQueue.push(direction);
+    this.#processQueue();
+  }
+
+  #handleKeyUp(event) {
+    const direction = this.#keyDirectionMap.get(event.key);
     if (!direction) {
       return;
     }
 
     event.preventDefault();
-
-    if (!this.heldDirections.includes(direction)) {
-      this.heldDirections.push(direction);
-    }
-
-    if (this.state === 'idle') {
-      this.#attemptMove();
-    }
-  };
-
-  #handleKeyUp = (event) => {
-    const direction = KEY_TO_DIRECTION[event.code];
-    if (!direction) {
-      return;
-    }
-
-    const index = this.heldDirections.indexOf(direction);
-    if (index !== -1) {
-      this.heldDirections.splice(index, 1);
-    }
-  };
-
-  constructor({
-    layout,
-    start,
-    moveSpeed = 6,
-    passableTiles = DEFAULT_PASSABLE_TILES,
-  } = {}) {
-    super();
-
-    this.layout = layout ?? [];
-    this.moveSpeed = moveSpeed;
-    this.passableTiles = new Set(passableTiles);
-
-    const { x = 0, y = 0 } = start ?? {};
-    this.currentTile = { x, y };
-    this.fromTile = { x, y };
-    this.toTile = { x, y };
-    this.progress = 0;
-    this.state = 'idle';
-    this.heldDirections = [];
-    this.lastTimestamp = 0;
-    this.started = false;
+    this.#pressedDirections.delete(direction);
   }
 
-  start() {
-    if (this.started) {
-      return;
-    }
-
-    this.started = true;
-    this.lastTimestamp = performance.now();
-    this.#emitInterpolation(this.currentTile, 0);
-    this.#emitTileEnter(this.currentTile);
-
-    window.addEventListener('keydown', this.#handleKeyDown);
-    window.addEventListener('keyup', this.#handleKeyUp);
-
-    this.#animationFrame = window.requestAnimationFrame(this.#tick);
-  }
-
-  destroy() {
-    if (!this.started) {
-      return;
-    }
-
-    this.started = false;
-    window.removeEventListener('keydown', this.#handleKeyDown);
-    window.removeEventListener('keyup', this.#handleKeyUp);
-
-    if (this.#animationFrame !== null) {
-      window.cancelAnimationFrame(this.#animationFrame);
-      this.#animationFrame = null;
-    }
-  }
-
-  setPosition(tile) {
-    if (!tile) {
-      return;
-    }
-
-    this.currentTile = { x: tile.x, y: tile.y };
-    this.fromTile = { ...this.currentTile };
-    this.toTile = { ...this.currentTile };
-    this.progress = 0;
-    this.state = 'idle';
-    this.#emitInterpolation(this.currentTile, 0);
-    this.#emitTileEnter(this.currentTile);
-  }
-
-  #tick = (timestamp) => {
-    if (!this.started) {
-      return;
-    }
-
-    const deltaMs = Math.max(0, timestamp - this.lastTimestamp);
-    this.lastTimestamp = timestamp;
-
-    if (this.state === 'moving') {
-      const durationMs = 1000 / Math.max(0.0001, this.moveSpeed);
-      this.progress += deltaMs / durationMs;
-
-      const clampedProgress = clamp01(this.progress);
-      const position = {
-        x: this.fromTile.x + (this.toTile.x - this.fromTile.x) * clampedProgress,
-        y: this.fromTile.y + (this.toTile.y - this.fromTile.y) * clampedProgress,
-      };
-
-      this.#emitInterpolation(position, clampedProgress);
-
-      if (this.progress >= 1) {
-        this.currentTile = { ...this.toTile };
-        this.fromTile = { ...this.currentTile };
-        this.progress = 0;
-        this.state = 'idle';
-        this.#emitTileEnter(this.currentTile);
-        this.#attemptMove();
+  #processQueue() {
+    while (!this.#currentMove && this.#directionQueue.length > 0) {
+      const nextDirection = this.#directionQueue.shift();
+      if (!this.#pressedDirections.has(nextDirection)) {
+        continue;
       }
-    } else {
-      this.#attemptMove();
+
+      if (this.#startMove(nextDirection)) {
+        return;
+      }
     }
+  }
 
-    this.#animationFrame = window.requestAnimationFrame(this.#tick);
-  };
-
-  #attemptMove() {
-    if (this.state !== 'idle') {
-      return false;
-    }
-
-    const direction = this.#getCurrentDirection();
+  #startMove(directionName) {
+    const direction = DIRECTIONS[directionName];
     if (!direction) {
       return false;
     }
 
-    const delta = DIRECTION_VECTORS[direction];
-    if (!delta) {
-      return false;
-    }
-
-    const nextTile = {
-      x: this.currentTile.x + delta.x,
-      y: this.currentTile.y + delta.y,
+    const targetTile = {
+      x: this.tilePosition.x + direction.x,
+      y: this.tilePosition.y + direction.y,
     };
 
-    if (!this.#isTilePassable(nextTile.x, nextTile.y)) {
+    if (this.canMoveTo && !this.canMoveTo(targetTile, directionName)) {
       return false;
     }
 
-    this.fromTile = { ...this.currentTile };
-    this.toTile = nextTile;
-    this.progress = 0;
-    this.state = 'moving';
-    this.#emitTilePreview(nextTile);
+    this.#currentMove = {
+      direction: directionName,
+      from: { ...this.tilePosition },
+      to: targetTile,
+      elapsed: 0,
+      duration: this.moveDuration,
+    };
+
+    const moveSnapshot = {
+      direction: this.#currentMove.direction,
+      from: { ...this.#currentMove.from },
+      to: { ...this.#currentMove.to },
+      elapsed: this.#currentMove.elapsed,
+      duration: this.#currentMove.duration,
+    };
+
+    this.callbacks.onMoveStart?.(moveSnapshot);
     return true;
   }
-
-  #getCurrentDirection() {
-    if (this.heldDirections.length === 0) {
-      return null;
-    }
-
-    return this.heldDirections[this.heldDirections.length - 1];
-  }
-
-  #isTilePassable(x, y) {
-    const row = this.layout?.[y];
-    if (!row) {
-      return false;
-    }
-
-    const tile = row[x];
-    if (!tile) {
-      return false;
-    }
-
-    if (this.passableTiles.size === 0) {
-      return true;
-    }
-
-    return this.passableTiles.has(tile);
-  }
-
-  #emitInterpolation(position, progress) {
-    const detail = {
-      position: { x: position.x, y: position.y },
-      from: { ...this.fromTile },
-      to: { ...this.toTile },
-      progress: clamp01(progress),
-      tile: {
-        x: Math.round(position.x),
-        y: Math.round(position.y),
-      },
-    };
-
-    this.dispatchEvent(new CustomEvent('interpolate', { detail }));
-  }
-
-  #emitTileEnter(tile) {
-    this.dispatchEvent(
-      new CustomEvent('tileenter', {
-        detail: {
-          tile: { x: tile.x, y: tile.y },
-        },
-      }),
-    );
-  }
-
-  #emitTilePreview(tile) {
-    this.dispatchEvent(
-      new CustomEvent('tilepreview', {
-        detail: {
-          tile: { x: tile.x, y: tile.y },
-        },
-      }),
-    );
-  }
 }
+
