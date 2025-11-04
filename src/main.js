@@ -1,7 +1,6 @@
 import { GameState } from './core/game-state.js';
 import { SaveManager } from './core/save-manager.js';
 import { SceneManager } from './core/scene-manager.js';
-import { GameState } from './core/game-state.js';
 import { StartingAreaScene } from './scenes/starting-area.js';
 import { TitleScreen } from './scenes/title-screen.js';
 
