@@ -118,6 +118,7 @@ export class PlayerState extends ObservableState {
     this.stats = createDefaultStats();
     this.equipment = createDefaultEquipment();
     this.skills = new Set();
+    this.conditions = [];
     this.saveMetadata = createDefaultSaveMetadata();
     this.settings = createDefaultSettings();
 
@@ -144,6 +145,7 @@ export class PlayerState extends ObservableState {
     const inventory = state.inventory ?? [];
     const equipment = state.equipment ?? {};
     const skills = state.skills ?? [];
+    const conditions = state.conditions ?? [];
     const saveMetadata = state.saveMetadata ?? {};
     const settings = state.settings ?? {};
 
@@ -151,6 +153,11 @@ export class PlayerState extends ObservableState {
     this.stats = { ...createDefaultStats(), ...stats };
     this.equipment = { ...createDefaultEquipment(), ...equipment };
     this.skills = new Set(Array.isArray(skills) ? skills : []);
+    this.conditions = Array.isArray(conditions)
+      ? conditions
+          .map((condition) => (condition == null ? null : `${condition}`.trim()))
+          .filter((condition) => condition && condition.length > 0)
+      : [];
     this.saveMetadata = {
       ...createDefaultSaveMetadata(),
       ...saveMetadata,
@@ -169,6 +176,7 @@ export class PlayerState extends ObservableState {
       stats: { ...this.stats },
       equipment: { ...this.equipment },
       skills: [...this.skills],
+      conditions: [...this.conditions],
       saveMetadata: {
         ...this.saveMetadata,
         lastLocation: this.saveMetadata.lastLocation
@@ -193,6 +201,10 @@ export class PlayerState extends ObservableState {
 
   getSkills() {
     return [...this.skills];
+  }
+
+  getConditions() {
+    return [...this.conditions];
   }
 
   getSettings() {
@@ -343,6 +355,68 @@ export class PlayerState extends ObservableState {
     return true;
   }
 
+  addCondition(condition) {
+    if (condition == null) {
+      return false;
+    }
+
+    const normalized = `${condition}`.trim();
+    if (normalized.length === 0 || this.conditions.includes(normalized)) {
+      return false;
+    }
+
+    this.conditions = [...this.conditions, normalized];
+
+    const detail = {
+      condition: normalized,
+      conditions: this.getConditions(),
+    };
+
+    this.#emitChange('conditions', detail);
+    return true;
+  }
+
+  removeCondition(condition) {
+    if (condition == null) {
+      return false;
+    }
+
+    const normalized = `${condition}`.trim();
+    const index = this.conditions.findIndex((entry) => entry === normalized);
+    if (index === -1) {
+      return false;
+    }
+
+    const removed = this.conditions[index];
+    this.conditions = [
+      ...this.conditions.slice(0, index),
+      ...this.conditions.slice(index + 1),
+    ];
+
+    const detail = {
+      condition: removed,
+      conditions: this.getConditions(),
+    };
+
+    this.#emitChange('conditions', detail);
+    return true;
+  }
+
+  clearConditions() {
+    if (this.conditions.length === 0) {
+      return false;
+    }
+
+    this.conditions = [];
+
+    const detail = {
+      conditions: this.getConditions(),
+    };
+
+    this.#emitChange('conditions', detail);
+    return true;
+  }
+
   updateSaveMetadata(partialMetadata = {}) {
     if (!partialMetadata || typeof partialMetadata !== 'object') {
       return this.getSaveMetadata();
@@ -447,6 +521,17 @@ export class GameState extends ObservableState {
 
   getPlayerState() {
     return this.playerState;
+  }
+
+  onChange(listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('listener must be a function');
+    }
+
+    return this.subscribe('change', (event) => {
+      const snapshot = event?.snapshot ?? this.getSnapshot();
+      listener(snapshot);
+    });
   }
 
   getSnapshot() {

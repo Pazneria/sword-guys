@@ -228,13 +228,24 @@ const textContentOf = (root, field) => {
 
 test('status panel reflects updates from the game state', () => {
   const mockDocument = createMockDocument();
-  const gameState = new GameState({
-    level: 5,
-    experience: { current: 120, nextLevel: 200 },
-    hp: { current: 34, max: 40 },
-    mp: { current: 18, max: 20 },
-    attributes: { strength: 15, agility: 13, vitality: 12, spirit: 11, luck: 9 },
-    conditions: ['Poisoned'],
+  const gameState = GameState.getInstance();
+  gameState.reset({
+    emit: false,
+    initialState: {
+      stats: {
+        level: 5,
+        experience: { current: 120, nextLevel: 200 },
+        health: 34,
+        maxHealth: 40,
+        mana: 18,
+        maxMana: 20,
+        strength: 15,
+        agility: 13,
+        intelligence: 12,
+        defense: 11,
+      },
+      conditions: ['Poisoned'],
+    },
   });
 
   const panel = new StatusPanel({ gameState, document: mockDocument });
@@ -248,26 +259,28 @@ test('status panel reflects updates from the game state', () => {
   assert.equal(textContentOf(element, 'hp'), '34 / 40');
   assert.equal(textContentOf(element, 'mp'), '18 / 20');
 
-  gameState.setLevel(6);
+  const playerState = gameState.getPlayerState();
+
+  playerState.updateStats({ level: 6 });
   assert.equal(textContentOf(element, 'level'), '6');
 
-  gameState.gainExperience(30);
+  playerState.updateStats({ experience: { current: 150, nextLevel: 200 } });
   assert.equal(textContentOf(element, 'experience'), '150 / 200');
 
-  gameState.modifyHP(-10);
+  playerState.updateStats({ health: 24 });
   assert.equal(textContentOf(element, 'hp'), '24 / 40');
 
-  gameState.modifyMP(-5);
+  playerState.updateStats({ mana: 13 });
   assert.equal(textContentOf(element, 'mp'), '13 / 20');
 
-  gameState.updateAttributes({ agility: 16 });
+  playerState.updateStats({ agility: 16 });
   const attributesList = element.querySelector('[data-section="attributes"]');
   const attributeEntries = attributesList
     ? attributesList.childNodes.filter((node) => node instanceof MockElement && node.tagName === 'dd')
     : [];
   assert.ok(attributeEntries.some((entry) => entry.textContent === '16'));
 
-  gameState.addCondition('Blessed');
+  playerState.addCondition('Blessed');
   const conditionsList = element.querySelector('[data-section="conditions"]');
   const conditionNames = conditionsList
     ? conditionsList.childNodes
@@ -276,7 +289,7 @@ test('status panel reflects updates from the game state', () => {
     : [];
   assert.deepEqual(conditionNames, ['Poisoned', 'Blessed']);
 
-  gameState.removeCondition('Poisoned');
+  playerState.removeCondition('Poisoned');
   const afterRemoval = conditionsList
     ? conditionsList.childNodes
         .filter((node) => node instanceof MockElement)
@@ -284,11 +297,14 @@ test('status panel reflects updates from the game state', () => {
     : [];
   assert.deepEqual(afterRemoval, ['Blessed']);
 
-  gameState.clearConditions();
+  playerState.clearConditions();
   const afterClear = conditionsList
     ? conditionsList.childNodes
         .filter((node) => node instanceof MockElement)
         .map((node) => node.textContent)
     : [];
   assert.deepEqual(afterClear, ['None']);
+
+  panel.unmount();
+  gameState.reset({ emit: false });
 });
