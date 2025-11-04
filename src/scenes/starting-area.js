@@ -28,9 +28,18 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
+  #handleGlobalKeyDown = () => {};
+
   constructor(
     root,
-    { config = STARTING_AREA_CONFIG, onExit, gameState = GameState.getInstance() } = {},
+    {
+      config = STARTING_AREA_CONFIG,
+      onExit,
+      gameState = GameState.getInstance(),
+      document: providedDocument,
+      window: providedWindow,
+      saveManager,
+    } = {},
   ) {
     this.root = root;
     this.config = config;
@@ -46,6 +55,16 @@ export class StartingAreaScene {
     this.playerController = null;
     this.gameState = gameState;
     this.playerState = this.gameState.getPlayerState();
+    this.playerControllerActive = false;
+    this.playerPausedForMenu = false;
+    this.playerStartPosition = null;
+    this.followDuringInterpolation = false;
+    this.unsubscribeFromGameState = null;
+    this.gameMenu = null;
+    this.saveManager = saveManager ?? null;
+    this.saveElements = { slotSelect: null, message: null, button: null };
+    this.saveMessageTimer = null;
+    this.lastSelectedSlot = null;
   }
 
   mount() {
@@ -77,6 +96,10 @@ export class StartingAreaScene {
     this.#applyInitialSettings();
     this.#subscribeToGameState();
 
+    if (this.window && typeof this.window.addEventListener === 'function') {
+      this.window.addEventListener('keydown', this.#handleGlobalKeyDown);
+    }
+
     if (this.gameState) {
       this.gameMenu = new GameMenu(this.container, {
         gameState: this.gameState,
@@ -88,6 +111,11 @@ export class StartingAreaScene {
   }
 
   unmount() {
+    if (typeof this.unsubscribeFromGameState === 'function') {
+      this.unsubscribeFromGameState();
+    }
+    this.unsubscribeFromGameState = null;
+
     if (this.window && typeof this.window.removeEventListener === 'function') {
       this.window.removeEventListener('keydown', this.#handleGlobalKeyDown);
     }
@@ -242,6 +270,9 @@ export class StartingAreaScene {
       this.config.tiles.WATER,
       this.config.tiles.ROCK,
     ]);
+
+    const settings = this.gameState?.getSettings?.();
+    const initialMovementBindings = settings?.keybindings?.movement;
 
     const isTilePassable = ({ x, y }) => {
       const row = this.config.layout[y];
