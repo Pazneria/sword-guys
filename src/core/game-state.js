@@ -43,6 +43,28 @@ const createDefaultSaveMetadata = () => ({
   playTime: 0,
 });
 
+const normalizeSceneId = (sceneId) => {
+  if (typeof sceneId !== 'string') {
+    return null;
+  }
+
+  const trimmed = sceneId.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const clonePosition = (position) => {
+  if (
+    !position ||
+    typeof position !== 'object' ||
+    !Number.isFinite(position.x) ||
+    !Number.isFinite(position.y)
+  ) {
+    return null;
+  }
+
+  return { x: position.x, y: position.y };
+};
+
 class ObservableState {
   constructor() {
     this._listeners = new Map();
@@ -409,6 +431,9 @@ export class GameState extends ObservableState {
       });
     });
 
+    this.scene = null;
+    this.playerPosition = null;
+
     instance = this;
   }
 
@@ -426,17 +451,131 @@ export class GameState extends ObservableState {
 
   getSnapshot() {
     return {
+      scene: this.scene,
+      playerPosition: this.playerPosition ? { ...this.playerPosition } : null,
       player: this.playerState.getSnapshot(),
     };
+  }
+
+  setScene(sceneId, { emit = true } = {}) {
+    const next = normalizeSceneId(sceneId);
+    const previous = this.scene;
+    this.scene = next;
+
+    if (emit && previous !== next) {
+      this.#emitSceneChange();
+    }
+
+    return this.scene;
+  }
+
+  getScene() {
+    return this.scene;
+  }
+
+  updatePlayerPosition(position, { emit = true } = {}) {
+    const next = clonePosition(position);
+    const previous = this.playerPosition ? { ...this.playerPosition } : null;
+
+    this.playerPosition = next;
+
+    const changed =
+      (previous && (!next || previous.x !== next.x || previous.y !== next.y)) ||
+      (!previous && next);
+
+    if (emit && changed) {
+      this.#emitPlayerPositionChange();
+    }
+
+    return this.playerPosition ? { ...this.playerPosition } : null;
+  }
+
+  getPlayerPosition() {
+    return this.playerPosition ? { ...this.playerPosition } : null;
+  }
+
+  hydrate(snapshot = {}) {
+    const state = snapshot && typeof snapshot === 'object' ? snapshot : {};
+
+    const scene = 'scene' in state ? state.scene : null;
+    const position = 'playerPosition' in state ? state.playerPosition : null;
+    this.setScene(scene, { emit: false });
+    this.updatePlayerPosition(position, { emit: false });
+
+    if (state.player) {
+      this.playerState.reset({ initialState: state.player });
+    } else {
+      this.playerState.reset();
+    }
+
+    const hydrated = this.getSnapshot();
+    this._emit('hydrate', hydrated);
+    this._emit('change', { type: 'hydrate', detail: hydrated, snapshot: hydrated });
+
+    return hydrated;
   }
 
   reset(options = {}) {
     this.playerState.reset(options);
 
+    this.scene = null;
+    this.playerPosition = null;
+
     if (options.emit !== false) {
+      this.#emitSceneChange();
+      this.#emitPlayerPositionChange();
       this._emit('reset', this.getSnapshot());
     }
+  }
+
+  snapshot() {
+    return this.getSnapshot();
+  }
+
+  #emitSceneChange() {
+    const detail = { scene: this.scene };
+    this._emit('scene', detail);
+    this._emit('change', { type: 'scene', detail, snapshot: this.getSnapshot() });
+  }
+
+  #emitPlayerPositionChange() {
+    const detail = { position: this.getPlayerPosition() };
+    this._emit('playerPosition', detail);
+    this._emit('change', {
+      type: 'playerPosition',
+      detail,
+      snapshot: this.getSnapshot(),
+    });
+  }
+
+  static setScene(sceneId, options) {
+    return GameState.getInstance().setScene(sceneId, options);
+  }
+
+  static getScene() {
+    return GameState.getInstance().getScene();
+  }
+
+  static updatePlayerPosition(position, options) {
+    return GameState.getInstance().updatePlayerPosition(position, options);
+  }
+
+  static getPlayerPosition() {
+    return GameState.getInstance().getPlayerPosition();
+  }
+
+  static hydrate(snapshot) {
+    return GameState.getInstance().hydrate(snapshot);
+  }
+
+  static reset(options) {
+    return GameState.getInstance().reset(options);
+  }
+
+  static snapshot() {
+    return GameState.getInstance().snapshot();
   }
 }
 
 export const gameState = GameState.getInstance();
+GameState.DEFAULT_SETTINGS = Object.freeze(createDefaultSettings());
