@@ -56,6 +56,7 @@ test('PlayerState mutations update state and emit events', () => {
   const equipmentEvents = [];
   const settingsEvents = [];
   const skillsEvents = [];
+  const conditionsEvents = [];
 
   const unsubscribeChange = player.subscribe('change', (payload) => {
     changeEvents.push(payload);
@@ -75,12 +76,17 @@ test('PlayerState mutations update state and emit events', () => {
   const unsubscribeSkills = player.subscribe('skills', (payload) => {
     skillsEvents.push(payload);
   });
+  const unsubscribeConditions = player.subscribe('conditions', (payload) => {
+    conditionsEvents.push(payload);
+  });
 
   player.updateStats({ health: 80, agility: 14 });
   player.addItem({ id: 'potion-small', name: 'Small Potion' });
   player.equipItem('weapon', { id: 'rusty-sword', name: 'Rusty Sword' });
   player.setOption('volume', 0.25);
   player.learnSkill('dash');
+  player.addCondition('Poisoned');
+  player.removeCondition('Poisoned');
 
   assert.equal(statsEvents.length, 1);
   assert.equal(statsEvents[0].stats.health, 80);
@@ -101,9 +107,12 @@ test('PlayerState mutations update state and emit events', () => {
   assert.equal(skillsEvents.length, 1);
   assert.deepEqual(skillsEvents[0].skills, ['dash']);
 
+  assert.ok(conditionsEvents.length >= 1, 'conditions subscribers should be notified');
+  assert.deepEqual(conditionsEvents[conditionsEvents.length - 1].conditions, []);
+
   assert.deepEqual(
     changeEvents.map((event) => event.type),
-    ['stats', 'inventory', 'equipment', 'settings', 'skills'],
+    ['stats', 'inventory', 'equipment', 'settings', 'skills', 'conditions', 'conditions'],
   );
 
   unsubscribeChange();
@@ -112,6 +121,7 @@ test('PlayerState mutations update state and emit events', () => {
   unsubscribeEquipment();
   unsubscribeSettings();
   unsubscribeSkills();
+  unsubscribeConditions();
 });
 
 test('GameState re-emits player changes and tracks save metadata', () => {
