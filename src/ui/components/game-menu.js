@@ -109,8 +109,6 @@ export class GameMenu {
 
     const options = [
       { label: 'Status', handler: () => this.#showStatusPanel() },
-      { label: 'Items', handler: null },
-      { label: 'Equipment', handler: null },
       { label: 'Save', handler: null },
       { label: 'Close', handler: () => this.onClose?.() },
     ];
