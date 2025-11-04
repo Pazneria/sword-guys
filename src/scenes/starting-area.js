@@ -28,7 +28,27 @@ export class StartingAreaScene {
     this.map.setCameraTarget(tile, { redraw });
   };
 
-  #handleGlobalKeyDown = () => {};
+  #handleGlobalKeyDown = (event) => {
+    if (!event || typeof event.key !== 'string' || !this.gameMenu) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (key === 'e') {
+      if (typeof event.preventDefault === 'function') {
+        event.preventDefault();
+      }
+      this.#toggleMenuVisibility();
+    } else if (key === 'escape' || key === 'esc') {
+      if (this.gameMenu.isVisible()) {
+        if (typeof event.preventDefault === 'function') {
+          event.preventDefault();
+        }
+        this.#toggleMenuVisibility(false);
+      }
+    }
+  };
 
   constructor(
     root,
@@ -39,6 +59,7 @@ export class StartingAreaScene {
       document: providedDocument,
       window: providedWindow,
       saveManager,
+      factories = {},
     } = {},
   ) {
     this.root = root;
@@ -65,6 +86,25 @@ export class StartingAreaScene {
     this.saveElements = { slotSelect: null, message: null, button: null };
     this.saveMessageTimer = null;
     this.lastSelectedSlot = null;
+
+    const defaultFactories = {
+      createMap: (canvas) => this.#createMap(canvas),
+      createPlayerController: (spawnPosition) =>
+        this.#createPlayerController(spawnPosition),
+    };
+
+    const providedFactories = typeof factories === 'object' && factories !== null ? factories : {};
+
+    this.factories = {
+      createMap:
+        typeof providedFactories.createMap === 'function'
+          ? providedFactories.createMap
+          : defaultFactories.createMap,
+      createPlayerController:
+        typeof providedFactories.createPlayerController === 'function'
+          ? providedFactories.createPlayerController
+          : defaultFactories.createPlayerController,
+    };
   }
 
   mount() {
@@ -81,17 +121,25 @@ export class StartingAreaScene {
     }
 
     const canvas = this.container.querySelector('.starting-area__canvas');
-    this.map = this.#createMap(canvas);
-    this.followDuringInterpolation = this.map.followSmoothing > 0;
+    this.map = this.factories.createMap(canvas, {
+      scene: this,
+      config: this.config,
+    });
+    const followSmoothing = Number(this.map?.followSmoothing ?? 0);
+    this.followDuringInterpolation = Number.isFinite(followSmoothing) && followSmoothing > 0;
     const spawn = this.#resolveSpawnPoint();
-    this.map.setCameraTarget(spawn);
-    this.map.setPlayerPosition(spawn);
-    this.map.start();
+    this.map?.setCameraTarget?.(spawn);
+    this.map?.setPlayerPosition?.(spawn);
+    this.map?.start?.();
 
     this.playerState.setLastKnownLocation(spawn);
 
-    this.playerController = this.#createPlayerController(spawn);
-    this.playerController.start();
+    this.playerController = this.factories.createPlayerController(spawn, {
+      scene: this,
+      config: this.config,
+      map: this.map,
+    });
+    this.#startPlayerController();
 
     this.#applyInitialSettings();
     this.#subscribeToGameState();
@@ -103,7 +151,8 @@ export class StartingAreaScene {
     if (this.gameState) {
       this.gameMenu = new GameMenu(this.container, {
         gameState: this.gameState,
-        playerController: this.playerController,
+        document: this.document,
+        onClose: () => this.#toggleMenuVisibility(false),
         onExit: this.onExit,
       });
       this.gameMenu.mount();
@@ -125,9 +174,7 @@ export class StartingAreaScene {
       this.gameMenu = null;
     }
 
-    if (this.playerController && typeof this.playerController.stop === 'function') {
-      this.playerController.stop();
-    }
+    this.#stopPlayerController();
     this.playerController = null;
     this.playerControllerActive = false;
     this.playerPausedForMenu = false;
@@ -143,6 +190,61 @@ export class StartingAreaScene {
 
     this.container = null;
     this.followDuringInterpolation = false;
+  }
+
+  #startPlayerController() {
+    if (
+      this.playerController &&
+      typeof this.playerController.start === 'function' &&
+      !this.playerControllerActive
+    ) {
+      this.playerController.start();
+      this.playerControllerActive = true;
+    }
+  }
+
+  #stopPlayerController() {
+    if (
+      this.playerController &&
+      typeof this.playerController.stop === 'function' &&
+      this.playerControllerActive
+    ) {
+      this.playerController.stop();
+      this.playerControllerActive = false;
+    }
+  }
+
+  #pausePlayerForMenu() {
+    if (!this.playerPausedForMenu) {
+      this.#stopPlayerController();
+      this.playerPausedForMenu = true;
+    }
+  }
+
+  #resumePlayerAfterMenu() {
+    if (this.playerPausedForMenu) {
+      this.#startPlayerController();
+      this.playerPausedForMenu = false;
+    }
+  }
+
+  #toggleMenuVisibility(force) {
+    if (!this.gameMenu) {
+      return false;
+    }
+
+    const shouldShow =
+      typeof force === 'boolean' ? force : this.gameMenu.isVisible() ? false : true;
+
+    if (shouldShow) {
+      this.gameMenu.show();
+      this.#pausePlayerForMenu();
+    } else {
+      this.gameMenu.hide();
+      this.#resumePlayerAfterMenu();
+    }
+
+    return shouldShow;
   }
 
   #applyInitialSettings() {
