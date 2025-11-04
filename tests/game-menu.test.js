@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { GameMenu } from '../src/ui/components/game-menu.js';
+import { GameState } from '../src/core/game-state.js';
 import { StartingAreaScene } from '../src/scenes/starting-area.js';
 
 class ClassList {
@@ -600,26 +601,31 @@ test('pressing E toggles the game menu and pauses player movement', () => {
 
 test('game menu arrow navigation moves focus between options', () => {
   const { document } = createTestEnvironment();
-  const menu = new GameMenu({ document });
-  document.body.append(menu.element);
+  const root = document.createElement('div');
+  document.body.append(root);
+
+  const gameState = GameState.getInstance();
+  gameState.reset({ emit: false });
+
+  const menu = new GameMenu(root, { gameState, document });
 
   menu.show();
 
   const labels = () => document.activeElement?.textContent;
 
-  assert.equal(labels(), 'Inventory');
+  assert.equal(labels(), 'Status');
 
   let event = createBubblingKeyEvent('ArrowDown');
   event.target = document.activeElement;
   document.activeElement.dispatchEvent(event);
-  assert.equal(labels(), 'Status');
+  assert.equal(labels(), 'Save');
 
   event = createBubblingKeyEvent('ArrowDown');
   event.target = document.activeElement;
   document.activeElement.dispatchEvent(event);
-  assert.equal(labels(), 'Equipment');
+  assert.equal(labels(), 'Close');
 
-  event = createBubblingKeyEvent('ArrowUp');
+  event = createBubblingKeyEvent('ArrowDown');
   event.target = document.activeElement;
   document.activeElement.dispatchEvent(event);
   assert.equal(labels(), 'Status');
@@ -627,12 +633,9 @@ test('game menu arrow navigation moves focus between options', () => {
   event = createBubblingKeyEvent('ArrowUp');
   event.target = document.activeElement;
   document.activeElement.dispatchEvent(event);
-  assert.equal(labels(), 'Inventory');
-
-  event = createBubblingKeyEvent('ArrowUp');
-  event.target = document.activeElement;
-  document.activeElement.dispatchEvent(event);
-  assert.equal(labels(), 'Return to Title');
+  assert.equal(labels(), 'Close');
 
   menu.destroy();
+  root.remove();
+  gameState.reset({ emit: false });
 });
