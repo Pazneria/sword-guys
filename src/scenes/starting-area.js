@@ -248,11 +248,12 @@ export class StartingAreaScene {
   }
 
   #applyInitialSettings() {
-    if (!this.gameState || !this.playerController) {
+    if (!this.playerController) {
       return;
     }
 
-    const settings = this.gameState.getSettings();
+    const settings = this.playerState?.getSettings?.()
+      ?? this.gameState?.getSettings?.();
     const movementBindings = settings?.keybindings?.movement;
     if (movementBindings) {
       this.playerController.setKeyBindings(movementBindings);
@@ -260,20 +261,21 @@ export class StartingAreaScene {
   }
 
   #subscribeToGameState() {
-    if (!this.gameState || !this.playerController) {
+    if (!this.playerController) {
       return;
     }
 
-    this.unsubscribeFromGameState = this.gameState.subscribe((state, detail) => {
-      if (detail?.section !== 'settings') {
-        return;
-      }
-
-      const movementBindings = state?.settings?.keybindings?.movement;
-      if (movementBindings) {
-        this.playerController.setKeyBindings(movementBindings);
-      }
-    });
+    if (this.playerState && typeof this.playerState.subscribe === 'function') {
+      this.unsubscribeFromGameState = this.playerState.subscribe(
+        'settings',
+        (detail) => {
+          const movementBindings = detail?.settings?.keybindings?.movement;
+          if (movementBindings) {
+            this.playerController.setKeyBindings(movementBindings);
+          }
+        },
+      );
+    }
   }
 
   getSpawnPoint() {
