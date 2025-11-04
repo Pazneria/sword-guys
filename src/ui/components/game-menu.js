@@ -25,7 +25,7 @@ export class GameMenu {
 
     this.root = root;
     this.gameState = gameState;
-    this.document = ensureDocument(doc);
+    this.document = ensureDocument(doc ?? root?.ownerDocument ?? null);
     this.onClose = typeof onClose === 'function' ? onClose : null;
 
     this.container = null;
@@ -37,16 +37,17 @@ export class GameMenu {
   }
 
   mount() {
-    if (this.container) {
-      return;
+    if (!this.container) {
+      this.container = this.#createView();
+      this.root.append(this.container);
     }
 
-    this.container = this.#createView();
-    this.root.append(this.container);
     this.#showMenu();
+    this.hide();
   }
 
   unmount() {
+    this.hide();
     this.#teardownPanel();
 
     if (this.container?.isConnected) {
@@ -57,6 +58,36 @@ export class GameMenu {
     this.menuList = null;
     this.panelContainer = null;
     this.menuOptions = [];
+  }
+
+  destroy() {
+    this.unmount();
+  }
+
+  show() {
+    if (!this.container) {
+      this.container = this.#createView();
+      this.root.append(this.container);
+    }
+
+    this.container.classList.add('game-menu--visible');
+    this.#showMenu();
+  }
+
+  hide() {
+    if (!this.container) {
+      return;
+    }
+
+    this.container.classList.remove('game-menu--visible');
+  }
+
+  isVisible() {
+    if (!this.container) {
+      return false;
+    }
+
+    return this.container.classList.contains('game-menu--visible');
   }
 
   #createView() {
