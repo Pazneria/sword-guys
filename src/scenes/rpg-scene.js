@@ -33,6 +33,8 @@ export class RPGScene {
   #hud;
   #activeOverlay;
   #stepCount;
+  #keydownHandler;
+  #keyupHandler;
 
   constructor(root, options = {}) {
     this.#root = root;
