@@ -21,6 +21,7 @@ const createDefaultStats = () => ({
   defense: 5,
   level: 1,
   experience: 0,
+  gold: 100, // Starting gold
 });
 
 const createDefaultEquipment = () => ({
@@ -659,6 +660,58 @@ export class GameState extends ObservableState {
 
   static snapshot() {
     return GameState.getInstance().snapshot();
+  }
+
+  // Convenience methods for common operations
+  getPlayerStats() {
+    return this.playerState.getStats();
+  }
+
+  updatePlayerStats(stats) {
+    return this.playerState.updateStats(stats);
+  }
+
+  getInventory() {
+    return this.playerState.getInventory();
+  }
+
+  addItem(item) {
+    return this.playerState.addItem(item);
+  }
+
+  removeItem(indexOrPredicate) {
+    if (typeof indexOrPredicate === 'number') {
+      return this.playerState.removeItem((_, idx) => idx === indexOrPredicate);
+    }
+    return this.playerState.removeItem(indexOrPredicate);
+  }
+
+  getEquipment() {
+    return this.playerState.getEquipment();
+  }
+
+  equipItem(slot, itemId) {
+    return this.playerState.equipItem(slot, itemId);
+  }
+
+  unequipItem(slot) {
+    return this.playerState.unequipItem(slot);
+  }
+
+  getGold() {
+    const stats = this.playerState.getStats();
+    return stats.gold || 0;
+  }
+
+  addGold(amount) {
+    const stats = this.playerState.getStats();
+    const newGold = Math.max(0, (stats.gold || 0) + amount);
+    this.playerState.updateStats({ gold: newGold });
+    return newGold;
+  }
+
+  setGold(amount) {
+    this.playerState.updateStats({ gold: Math.max(0, amount) });
   }
 }
 

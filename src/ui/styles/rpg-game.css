@@ -1,0 +1,500 @@
+/* RPG Game Styles */
+
+.rpg-scene {
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.rpg-game-area {
+  position: relative;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#rpg-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 4px solid #333;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+/* HUD Styles */
+.game-hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 3px solid #fff;
+  padding: 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.hud-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hud-label {
+  color: #aaa;
+}
+
+.hud-value {
+  color: #fff;
+  font-weight: bold;
+}
+
+.hud-hp .hud-value {
+  color: #e74c3c;
+}
+
+.hud-mp .hud-value {
+  color: #3498db;
+}
+
+.hud-gold .hud-value {
+  color: #f39c12;
+}
+
+/* Dialogue Scene */
+.dialogue-scene {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.dialogue-box {
+  background: rgba(0, 0, 0, 0.9);
+  border: 4px solid #fff;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  color: #fff;
+  max-width: 800px;
+  margin: 0 auto;
+  pointer-events: all;
+}
+
+.dialogue-npc-name {
+  font-size: 12px;
+  color: #f39c12;
+  margin-bottom: 12px;
+}
+
+.dialogue-text {
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.dialogue-prompt {
+  font-size: 10px;
+  color: #aaa;
+  text-align: right;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Battle Scene */
+.battle-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.battle-container {
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Press Start 2P', monospace;
+  color: #fff;
+  padding: 20px;
+}
+
+.battle-enemy {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  background: rgba(50, 50, 50, 0.5);
+  margin-bottom: 10px;
+  padding: 20px;
+}
+
+.enemy-info {
+  text-align: center;
+  width: 100%;
+}
+
+.enemy-name {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #e74c3c;
+}
+
+.enemy-hp-bar {
+  width: 200px;
+  height: 20px;
+  background: #333;
+  border: 2px solid #fff;
+  margin: 0 auto 8px;
+  position: relative;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+  transition: width 0.3s ease;
+}
+
+.enemy-hp-text {
+  font-size: 10px;
+  color: #aaa;
+}
+
+.battle-log {
+  height: 120px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.7);
+  border: 3px solid #fff;
+  padding: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.battle-log div {
+  margin-bottom: 8px;
+}
+
+.battle-player {
+  background: rgba(0, 0, 0, 0.7);
+  border: 3px solid #fff;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.player-info {
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+}
+
+.battle-menu {
+  background: rgba(0, 0, 0, 0.7);
+  border: 3px solid #fff;
+  padding: 16px;
+  min-height: 100px;
+}
+
+.battle-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-option {
+  font-size: 14px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.menu-option.selected {
+  background: #3498db;
+  color: #fff;
+  transform: translateX(8px);
+}
+
+.menu-waiting {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  padding: 20px;
+}
+
+.battle-victory,
+.battle-defeat,
+.battle-flee {
+  text-align: center;
+  padding: 20px;
+}
+
+.victory-title {
+  font-size: 18px;
+  color: #2ecc71;
+  margin-bottom: 16px;
+}
+
+.defeat-title {
+  font-size: 18px;
+  color: #e74c3c;
+  margin-bottom: 16px;
+}
+
+.menu-prompt {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 16px;
+  animation: blink 1s infinite;
+}
+
+.battle-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-title {
+  font-size: 12px;
+  color: #f39c12;
+  margin-bottom: 12px;
+}
+
+.menu-hint {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 12px;
+}
+
+.menu-empty {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  padding: 20px;
+}
+
+/* Menu Scene */
+.menu-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.menu-container {
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+  background: rgba(20, 20, 20, 0.95);
+  border: 4px solid #fff;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Press Start 2P', monospace;
+  color: #fff;
+}
+
+.menu-tabs {
+  display: flex;
+  border-bottom: 3px solid #fff;
+}
+
+.menu-tab {
+  flex: 1;
+  padding: 16px;
+  background: #333;
+  border: none;
+  border-right: 3px solid #fff;
+  color: #aaa;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-tab:last-child {
+  border-right: none;
+}
+
+.menu-tab:hover {
+  background: #444;
+  color: #fff;
+}
+
+.menu-tab.active {
+  background: #3498db;
+  color: #fff;
+}
+
+.menu-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.menu-footer {
+  padding: 16px;
+  text-align: center;
+  font-size: 10px;
+  color: #aaa;
+  border-top: 3px solid #fff;
+}
+
+/* Status Tab */
+.menu-status h2 {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #f39c12;
+}
+
+.status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #444;
+}
+
+.stat-row.gold {
+  border-color: #f39c12;
+  background: rgba(243, 156, 18, 0.1);
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Inventory Tab */
+.menu-inventory h2 {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #f39c12;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-item {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #444;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.menu-item.selected {
+  border-color: #3498db;
+  background: rgba(52, 152, 219, 0.2);
+  transform: translateX(4px);
+}
+
+.item-name {
+  display: block;
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.item-desc {
+  display: block;
+  font-size: 10px;
+  color: #aaa;
+}
+
+/* Equipment Tab */
+.menu-equipment h2 {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #f39c12;
+}
+
+.equipment-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.equipment-slot {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #444;
+}
+
+.slot-label {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.slot-value {
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Scrollbar styling */
+.menu-content::-webkit-scrollbar,
+.battle-log::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-content::-webkit-scrollbar-track,
+.battle-log::-webkit-scrollbar-track {
+  background: #222;
+}
+
+.menu-content::-webkit-scrollbar-thumb,
+.battle-log::-webkit-scrollbar-thumb {
+  background: #666;
+  border: 2px solid #222;
+}
+
+.menu-content::-webkit-scrollbar-thumb:hover,
+.battle-log::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
