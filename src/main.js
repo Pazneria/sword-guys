@@ -1,7 +1,7 @@
 import { GameState } from './core/game-state.js';
 import { SaveManager } from './core/save-manager.js';
 import { SceneManager } from './core/scene-manager.js';
-import { StartingAreaScene } from './scenes/starting-area.js';
+import { RPGScene } from './scenes/rpg-scene.js';
 import { TitleScreen } from './scenes/title-screen.js';
 
 async function bootstrap() {
@@ -9,12 +9,14 @@ async function bootstrap() {
   const scenes = new SceneManager();
   const saveManager = new SaveManager();
 
-  const startStartingArea = () => {
-    const startingArea = new StartingAreaScene(root, {
-      onExit: showTitleScreen,
+  const startRPG = () => {
+    const gameState = GameState.getInstance();
+    const rpgScene = new RPGScene(root, {
+      gameState,
       saveManager,
+      startMapId: 'overworld'
     });
-    scenes.show(startingArea);
+    scenes.show(rpgScene);
   };
 
   const showTitleScreen = () => {
@@ -24,7 +26,7 @@ async function bootstrap() {
       saveManager,
       onNew: () => {
         GameState.reset();
-        startStartingArea();
+        startRPG();
       },
       onContinue: (slot) => {
         if (!slot?.slotId) {
@@ -34,7 +36,7 @@ async function bootstrap() {
         const snapshot = slot.data ?? saveManager.load(slot.slotId);
         if (snapshot) {
           GameState.hydrate(snapshot);
-          startStartingArea();
+          startRPG();
         }
       },
       onLoad: (slots) => {
@@ -46,7 +48,7 @@ async function bootstrap() {
         const snapshot = target.data ?? saveManager.load(target.slotId);
         if (snapshot) {
           GameState.hydrate(snapshot);
-          startStartingArea();
+          startRPG();
         }
       },
     });
