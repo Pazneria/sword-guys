@@ -76,8 +76,8 @@ export class RPGScene {
     // Create renderer
     this.#renderer = new TileMapRenderer(this.#canvas, {
       scale: 2,
-      viewportWidth: 20,
-      viewportHeight: 15,
+      viewportWidth: 32,
+      viewportHeight: 18,
       cameraSmoothing: 0.15
     });
 
