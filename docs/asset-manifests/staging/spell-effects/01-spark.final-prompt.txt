@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: Sword Guys battle spell animation strip, final production art
+Primary request: Create a short pixel-art spell effect strip for Spark.
+Subject: Fast yellow lightning bolt that travels into a sharp hit flash.
+Style/medium: Clean readable compact RPG pixel art, crisp high-contrast effect shapes, no character art.
+Composition/framing: One horizontal row of 6 evenly spaced animation frames, each frame a centered 64x64 square. Start with a small electric charge, grow into a quick yellow bolt, end with a compact white-yellow impact flash. The final strip will be normalized to 384x64.
+Lighting/mood: Snappy bright lightning against transparent gameplay use.
+Color palette: Yellow, pale gold, white, tiny blue-white electric accents.
+Transparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.
+Constraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the effect small enough that it will not hide enemy HP bars.
+Avoid: Large scene illustration, radial vignette, black background, panel text, letters, character hands, or complex environment details.

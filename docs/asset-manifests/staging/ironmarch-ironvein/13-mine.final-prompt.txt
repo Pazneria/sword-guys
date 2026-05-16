@@ -1,0 +1,8 @@
+Use case: game-asset
+Asset type: Sword Guys 16:9 pixel-art JRPG battle backdrop, opaque PNG
+Primary request: Create a 16:9 pixel-art JRPG battle backdrop for Ironmarch mine. Rock wall, rails, warm forge light, dark dust. Leave readable floor/ground space for Ari on the left and enemies on the right, keep the lower UI area visually quiet, no characters, no text, no watermark.
+Scene details: deep Ironmarch mine interior with rough dark rock walls, mine rails receding into the middle distance, timber supports, warm orange forge spill from side tunnels, dusty air, iron ore glints, restrained contrast. The scene should feel dangerous but playable, not cluttered.
+Battle layout: leave clear readable ground/floor space on the left third for the player and on the right third for enemies. Keep the lower third darker and visually calm for the DOM battle UI. Avoid bright focal points or busy rails directly behind the lower UI region.
+Style/medium: crisp 2D pixel-art JRPG battle background, production-ready game asset, widescreen 16:9 composition, no painterly blur, no photorealism, no poster art.
+Composition/framing: wide battle backdrop only, camera facing into the mine with depth and readable side staging areas. No characters, monsters, silhouettes, signs, labels, letters, UI, border, or watermark.
+Output constraints: opaque image, 16:9 landscape, suitable for normalization to 1600x900 PNG. Do not use transparent background. Do not include any foreground object that blocks the player or enemy staging areas.

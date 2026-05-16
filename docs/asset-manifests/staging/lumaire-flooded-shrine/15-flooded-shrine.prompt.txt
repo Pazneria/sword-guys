@@ -1,0 +1,15 @@
+Asset: flooded_shrine
+Kind: tileset
+Target: public/assets/environment/flooded-shrine-tiles.png
+Receipt: public/assets/environment/flooded-shrine-tiles.png.receipt.json
+
+Prompt:
+Create a 32x32-tile pixel-art environment tileset for Flooded Shrine. Mirror pools, blue shrine floors, reed edges, sluice props. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.
+
+Output Contract: Tileset PNG with dimensions divisible by 32; each tile occupies a 32x32 grid cell.
+Runtime Use: Loaded as a tileset spritesheet for flooded_shrine map rendering.
+Transparency: required
+Verification: Tile boundaries must align to the 32x32 grid. | Blocking props and walkable ground must remain visually distinct. | No labels, text, watermark, or perspective scene composition.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset flooded_shrine --review-note "Purpose-built flooded_shrine art reviewed in Sword Guys QA." --write

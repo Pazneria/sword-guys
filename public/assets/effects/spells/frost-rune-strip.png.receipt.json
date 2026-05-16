@@ -1,0 +1,10 @@
+{
+  "assetId": "frost_rune",
+  "targetPath": "public/assets/effects/spells/frost-rune-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for Frost Rune. Blue-white icy sigil, 10-frame rune reveal and sharp crystal impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys battle spell animation strip, final production art\nPrimary request: Create a short pixel-art spell effect strip for Frost Rune.\nSubject: Blue-white icy sigil reveal followed by a sharp crystal impact.\nStyle/medium: Clean readable compact RPG pixel art, angular ice magic, no character art.\nComposition/framing: One horizontal row of 10 evenly spaced animation frames, each frame a centered 64x64 square. Start with faint rune strokes, build into a blue-white sigil, then snap into a compact crystal burst and fade. The final strip will be normalized to 640x64.\nLighting/mood: Cold precise spell, sharp crystalline readability.\nColor palette: Ice blue, deep blue outline, white highlights, faint pale-cyan glow.\nTransparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.\nConstraints: No readable letters, no frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the rune abstract and not language-like.\nAvoid: Alphabetic symbols, snowfield scene, black background, character hands, full-screen blizzard, or huge ice wall.",
+  "reviewNote": "Purpose-built Frost Rune spell effect strip generated from the staged manifest prompt, chroma-key-cleaned, normalized to a transparent 640x64 PNG with 10 evenly spaced 64x64 frames, and visually reviewed for abstract blue-white rune buildup, compact crystal impact, no readable letters, no characters, and battle-UI-safe scale."
+}

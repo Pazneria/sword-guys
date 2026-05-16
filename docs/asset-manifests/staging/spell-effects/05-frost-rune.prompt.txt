@@ -1,0 +1,15 @@
+Asset: frost_rune
+Kind: spellEffect
+Target: public/assets/effects/spells/frost-rune-strip.png
+Receipt: public/assets/effects/spells/frost-rune-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for Frost Rune. Blue-white icy sigil, 10-frame rune reveal and sharp crystal impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 10 frames, 64x64 per frame, total 640x64.
+Runtime Use: Loaded as spell:frost_rune spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset frost_rune --review-note "Purpose-built frost_rune art reviewed in Sword Guys QA." --write

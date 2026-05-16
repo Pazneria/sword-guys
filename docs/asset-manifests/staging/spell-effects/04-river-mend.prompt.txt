@@ -1,0 +1,15 @@
+Asset: river_mend
+Kind: spellEffect
+Target: public/assets/effects/spells/river-mend-strip.png
+Receipt: public/assets/effects/spells/river-mend-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for River Mend. Water-light healing ring, 10-frame blue ripple and white glints. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 10 frames, 64x64 per frame, total 640x64.
+Runtime Use: Loaded as spell:river_mend spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset river_mend --review-note "Purpose-built river_mend art reviewed in Sword Guys QA." --write

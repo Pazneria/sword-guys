@@ -1,0 +1,10 @@
+{
+  "assetId": "frost_rune",
+  "targetPath": "public/assets/effects/spells/frost-rune-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for Frost Rune. Blue-white icy sigil, 10-frame rune reveal and sharp crystal impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Create a short transparent pixel-art spell effect strip for Frost Rune. Blue-white icy sigil, 10-frame rune reveal and sharp crystal impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}

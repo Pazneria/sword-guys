@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: Sword Guys battle spell animation strip, final production art
+Primary request: Create a short pixel-art spell effect strip for Ember.
+Subject: Small orange fire projectile that bursts into simple flame tongues.
+Style/medium: Clean readable compact RPG pixel art, warm fire magic, no character art.
+Composition/framing: One horizontal row of 8 evenly spaced animation frames, each frame a centered 64x64 square. Start with a tiny ember spark, become a small orange projectile, then end in a tight red-orange burst. The final strip will be normalized to 512x64.
+Lighting/mood: Quick warm attack spell, bright center with readable silhouette.
+Color palette: Orange, amber, red-orange, pale yellow highlights, tiny smoke-gray pixels only if needed.
+Transparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.
+Constraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the fire burst compact and not screen-filling.
+Avoid: Large explosion scene, black background, letters, character hands, torches, or environmental flames.

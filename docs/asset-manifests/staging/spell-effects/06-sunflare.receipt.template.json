@@ -1,0 +1,10 @@
+{
+  "assetId": "sunflare",
+  "targetPath": "public/assets/effects/spells/sunflare-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for Sunflare. Golden late-game light burst, 12-frame beam flare and radiant impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Create a short transparent pixel-art spell effect strip for Sunflare. Golden late-game light burst, 12-frame beam flare and radiant impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}

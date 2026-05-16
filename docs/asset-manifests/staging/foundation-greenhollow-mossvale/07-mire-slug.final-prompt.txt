@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: Sword Guys enemy battle sprite source for background removal
+Primary request: Create a compact pixel-art battle sprite for Mire Slug, a slime enemy from Greenhollow fields. Longer green slug body, damp underside, low silhouette. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.
+Subject: A single squat green mire slug, longer and lower than Field Slime, damp rounded body, tiny simple eyes, soft glossy highlights, slightly darker underside, clear slug silhouette without looking like a generic blob. Keep it centered with generous padding and no props.
+Style: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited green and olive palette, clean edges, no painterly rendering.
+Background: perfectly flat solid #ff00ff chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff anywhere in the subject.
+Composition: single sprite only, centered, full body visible, no scene, no battle backdrop, no UI, no labels.

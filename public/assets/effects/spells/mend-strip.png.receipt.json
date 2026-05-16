@@ -1,0 +1,10 @@
+{
+  "assetId": "mend",
+  "targetPath": "public/assets/effects/spells/mend-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for Mend. Green-blue healing pulse, 8-frame expanding ring and soft sparkle. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys battle spell animation strip, final production art\nPrimary request: Create a short pixel-art spell effect strip for Mend.\nSubject: Green-blue healing pulse with an expanding ring and soft sparkles.\nStyle/medium: Clean readable compact RPG pixel art, gentle healing magic, no character art.\nComposition/framing: One horizontal row of 8 evenly spaced animation frames, each frame a centered 64x64 square. Start with a small teal spark, expand into a green-blue ring, add a few white glints, then fade softly. The final strip will be normalized to 512x64.\nLighting/mood: Calm restorative glow, readable at small battle scale.\nColor palette: Teal, aqua, soft green, pale white glints.\nTransparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.\nConstraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the effect compact enough that it will not hide command feedback.\nAvoid: Character silhouettes, medical symbols, black background, labels, panel text, or full-screen aura.",
+  "reviewNote": "Purpose-built Mend spell effect strip generated from the staged manifest prompt, chroma-key-cleaned, normalized to a transparent 512x64 PNG with 8 evenly spaced 64x64 frames, and visually reviewed for green-blue healing pulse readability, soft sparkle fade, no text, no characters, and battle-UI-safe scale."
+}

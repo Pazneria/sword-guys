@@ -1,0 +1,15 @@
+Asset: ember
+Kind: spellEffect
+Target: public/assets/effects/spells/ember-strip.png
+Receipt: public/assets/effects/spells/ember-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for Ember. Small orange fire projectile, 8-frame burst with simple flame tongues. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 8 frames, 64x64 per frame, total 512x64.
+Runtime Use: Loaded as spell:ember spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset ember --review-note "Purpose-built ember art reviewed in Sword Guys QA." --write

@@ -1,0 +1,10 @@
+{
+  "assetId": "waymeet_broker",
+  "targetPath": "public/assets/characters/npcs/waymeet-broker.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a 64x64 top-down pixel RPG overworld NPC sprite for Broker Sel, merchant objective giver in Waymeet. Trade ledger, road cloak, coin-brass accents, calculating posture. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: game-asset\nAsset type: Sword Guys 64x64 top-down overworld NPC sprite, transparent PNG source\nPrimary request: Create a 64x64 top-down pixel RPG overworld NPC sprite for Broker Sel, merchant objective giver in Waymeet. Trade ledger, road cloak, coin-brass accents, calculating posture. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.\nCharacter details: middle-aged road-market broker, compact chibi/top-down RPG proportions, tan road cloak, brass coin clasps, small dark ledger held close, calculating posture with one shoulder slightly forward, travel-worn boots. Distinct from Greenhollow villagers and not a recolor.\nStyle/medium: crisp 2D pixel art, JRPG overworld sprite, three-quarter top-down readability, production-ready game asset, clean silhouette, limited palette, no painterly blur.\nComposition/framing: single centered character only, feet near bottom-middle anchor, enough transparent margin for a 64x64 sprite crop. No background, no shadow blob outside sprite, no props detached from the character.\nTechnical constraints: transparent background, no scenery, no labels, no readable text, no watermark, no poster framing, no multiple characters, no sprite sheet; just one full-body NPC sprite.",
+  "reviewNote": "Purpose-built Waymeet Broker sprite generated from the staged manifest prompt, checkerboard-cleaned, normalized to a 64x64 transparent PNG, and visually reviewed on dark and light backgrounds for 32px overworld readability."
+}

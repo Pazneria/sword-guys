@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: Sword Guys enemy battle sprite source for background removal
+Primary request: Create a compact pixel-art battle sprite for Grass Wolf, a beast enemy from the grassland road. Lean mossy wolf, low running profile, yellow-green coat. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.
+Subject: A single purpose-built Sword Guys grass wolf, lean low-running canine silhouette with pointed ears, narrow muzzle, alert eyes, mossy green patches along a yellow-green coat, compact legs, and a readable predatory stance. Keep it centered with generous padding and no props.
+Style: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited yellow-green, moss green, and earthy shadow palette, clean edges, no painterly rendering, no recycled or other-project-looking art.
+Background: perfectly flat solid #ff00ff chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff anywhere in the subject.
+Composition: single sprite only, centered, full body visible, side-facing three-quarter battle pose, no scene, no battle backdrop, no UI, no labels.

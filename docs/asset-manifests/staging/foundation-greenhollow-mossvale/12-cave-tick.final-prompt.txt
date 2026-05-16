@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: Sword Guys enemy battle sprite source for background removal
+Primary request: Create a compact pixel-art battle sprite for Cave Tick, a cave insect enemy from Mossvale Cave. Round cave insect, many small legs, dark brown shell. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.
+Subject: A single purpose-built Sword Guys cave tick, squat round dark-brown shell, many tiny hooked legs, small glowing cave eyes, compact crawling posture, rugged chitin plates, slightly damp cave sheen, distinct from a beetle or spider. Keep it centered with generous padding and no props.
+Style: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited dark brown, umber, tan highlight, and deep shadow palette, clean edges, no painterly rendering, no recycled or other-project-looking art.
+Background: perfectly flat solid #00ff00 chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #00ff00 anywhere in the subject.
+Composition: single sprite only, centered, full body visible, low crawling three-quarter battle pose, no scene, no battle backdrop, no UI, no labels.

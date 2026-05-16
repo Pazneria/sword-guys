@@ -1,0 +1,10 @@
+{
+  "assetId": "eclipse_tower",
+  "targetPath": "public/assets/environment/eclipse-tower-tiles.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a 32x32-tile pixel-art environment tileset for Eclipse Tower. Starless stone, violet light, archive shelves, observatory gate. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.",
+  "finalPrompt": "Create a 32x32-tile pixel-art environment tileset for Eclipse Tower. Starless stone, violet light, archive shelves, observatory gate. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}

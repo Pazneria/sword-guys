@@ -1,0 +1,8 @@
+Use case: game-asset
+Asset type: Sword Guys 16:9 JRPG battle backdrop, opaque PNG
+Primary request: Create a 16:9 pixel-art JRPG battle backdrop for Flooded Shrine. Mirror pools, blue stone, shallow water, pale reflected sky. Leave readable floor/ground space for Ari on the left and enemies on the right, keep the lower UI area visually quiet, no characters, no text, no watermark.
+Scene details: interior flooded shrine chamber with shallow mirror pools, blue stone floor, pale reflected sky-light from broken openings above, reed edges and sluice hints along the sides, quiet shrine magic, reflective water without becoming high-noise. Include a clear combat plane across the middle with enough flat stone or shallow water for battle positions.
+Style/medium: crisp pixel-art JRPG battle background, production-ready game asset, readable shapes, limited Flooded Shrine palette, no painterly blur, no photorealism.
+Composition/framing: 16:9 landscape composition. Ari must have readable floor space on the left third and enemies must have readable floor space on the right third. Keep the lower third low-contrast and uncluttered for DOM battle UI overlays. Use blue stone and mirror pools for depth but avoid busy foreground clutter.
+Output/background: opaque image, no transparency required. Fill the full frame edge to edge with the backdrop.
+Hard negative constraints: no characters, no monsters, no NPCs, no battle UI, no text, no labels, no readable signs, no letters, no logos, no watermark, no browser chrome, no toolbar, no page background, no black bars, no decorative border, no foreground object covering the lower third. Only the standalone Flooded Shrine battle backdrop.

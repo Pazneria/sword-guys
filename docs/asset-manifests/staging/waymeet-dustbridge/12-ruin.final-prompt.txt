@@ -1,0 +1,9 @@
+Use case: game-asset
+Asset type: Sword Guys 16:9 JRPG battle backdrop, opaque PNG source
+Primary request: Create a 16:9 pixel-art JRPG battle backdrop for Dustbridge Ruins. Broken stone bridge, ochre dust, old route-seal carvings.
+Scene/backdrop: an ancient ruined stone bridge and dry ruin plaza in Dustbridge Ruins, with cracked flagstones, partial bridge arches, scattered broken blocks, ochre dust, faded route-seal carvings on stone slabs, and distant desert haze through ruined openings. The space should feel old, abandoned, and tense without showing any people or enemies.
+Composition/framing: wide 16:9 battle backdrop. Leave a readable ground/floor area on the left for Ari and on the right for enemies. Keep the lower third visually quiet for the DOM battle UI, mostly broad cracked floor with low-contrast dust. Put larger broken bridge shapes and carved slabs in the middle/upper background, not blocking combat floor.
+Style/medium: crisp 2D pixel art, JRPG battle background, production-ready game backdrop, clean readable forms, limited ochre stone palette, no painterly blur.
+Lighting/mood: dusty amber light, old ruins atmosphere, slightly ominous but still readable.
+Color palette: ochre dust, tan stone, muted gray-brown cracks, faded blue-gray distant haze, small pale carved-stone highlights.
+Hard negative constraints: no characters, no monsters, no animals, no vehicles, no UI, no browser chrome, no website screenshot, no text, no readable inscription letters, no labels, no logos, no watermark, no battle menu, no foreground object blocking the combat floor. Only the empty Dustbridge Ruins battle backdrop.

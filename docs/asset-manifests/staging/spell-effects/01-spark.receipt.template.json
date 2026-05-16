@@ -1,0 +1,10 @@
+{
+  "assetId": "spark",
+  "targetPath": "public/assets/effects/spells/spark-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for Spark. Fast yellow lightning bolt, 6-frame projectile and hit flash. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Create a short transparent pixel-art spell effect strip for Spark. Fast yellow lightning bolt, 6-frame projectile and hit flash. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}

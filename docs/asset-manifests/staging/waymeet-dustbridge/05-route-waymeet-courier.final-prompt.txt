@@ -1,0 +1,7 @@
+Use case: game-asset
+Asset type: Sword Guys 64x64 top-down overworld NPC sprite, transparent PNG source
+Primary request: Create a 64x64 top-down pixel RPG overworld NPC sprite for Wounded Courier, route-event courier in the Waymeet road. Dusty cloak, courier tag, bandaged arm, urgent wounded posture. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.
+Character details: young road courier with a dust-stained travel cloak, small courier tag or clasp, one arm wrapped in a bandage, slightly hunched urgent wounded posture, one foot forward as if staggering to deliver a message. Palette: dusty tan, muted blue-gray, small red bandage accent. Distinct from Waymeet town NPCs, not a recolor.
+Style/medium: crisp 2D pixel art, JRPG overworld sprite, three-quarter top-down readability, production-ready game asset, clean silhouette, limited road-market palette, no painterly blur.
+Composition/framing: single centered full-body character only, feet visible near bottom-middle anchor, enough transparent margin for a 64x64 sprite crop.
+Hard negative constraints: no browser chrome, no website screenshot, no UI, no toolbar, no text, no headings, no logos, no watermark, no page background, no cropped head, no multiple characters, no sprite sheet, no scenery, no labels. Only the standalone pixel-art wounded courier on transparent background.

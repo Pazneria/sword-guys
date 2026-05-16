@@ -1,0 +1,10 @@
+{
+  "assetId": "town",
+  "targetPath": "public/assets/battle/town-battle.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a 16:9 pixel-art JRPG battle backdrop for village town edge. Fence, cottage hints, warm safe-town colors, no major characters. Leave readable floor/ground space for Ari on the left and enemies on the right, keep the lower UI area visually quiet, no characters, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys battle backdrop, opaque 16:9 PNG source\nPrimary request: Create a 16:9 pixel-art JRPG battle backdrop for a village town edge. Fence, cottage hints, warm safe-town colors, no major characters. Leave readable floor/ground space for Ari on the left and enemies on the right, keep the lower UI area visually quiet, no characters, no text, no watermark.\nScene/backdrop: A sunny first-village edge outside Greenhollow, with a simple wooden fence, soft grass, a dirt battle clearing, tiny cottage roof and garden hints in the distance, and gentle hills beyond.\nStyle/medium: crisp 2D pixel-art JRPG battle background, production-ready game asset, warm but not overly saturated, clear readable planes, no painterly blur, no recycled or other-project-looking art.\nComposition/framing: wide 16:9 landscape composition. Empty readable combat floor across the middle, Ari-safe space on the left, enemy-safe space on the right. Lower third must be visually quiet for the DOM battle UI, with simple ground texture only. No foreground UI frame.\nLighting/mood: friendly late-morning village light, calm first-region mood.\nConstraints: opaque background, no transparency, no characters, no creatures, no signs with readable text, no labels, no watermark, no poster composition, no dramatic camera angle.",
+  "reviewNote": "Purpose-built town battle backdrop generated from the staged manifest prompt, normalized to opaque 1280x720, and visually reviewed for left/right combat space plus a quiet lower battle UI area."
+}

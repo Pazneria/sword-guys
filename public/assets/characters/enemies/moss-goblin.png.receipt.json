@@ -1,0 +1,10 @@
+{
+  "assetId": "moss_goblin",
+  "targetPath": "public/assets/characters/enemies/moss-goblin.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a compact pixel-art battle sprite for Moss Goblin, a goblin enemy from Mossvale Cave. Green squat goblin with mossy ears and cave-scrap clothing. Transparent background, strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys enemy battle sprite source for background removal\nPrimary request: Create a compact pixel-art battle sprite for Moss Goblin, a goblin enemy from Mossvale Cave. Green squat goblin with mossy ears and cave-scrap clothing. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.\nSubject: A single purpose-built Sword Guys moss goblin, squat green cave goblin with oversized mossy ears, hunched stance, small sharp eyes, cave-scrap clothing made from ragged cloth and pebble bits, moss patches on shoulders and ears, compact claws, clearly distinct from the Pebble Imp. Keep it centered with generous padding and no props.\nStyle: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited moss green, dark cave green, brown rag cloth, and stone-gray accent palette, clean edges, no painterly rendering, no recycled or other-project-looking art.\nBackground: perfectly flat solid #ff00ff chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff anywhere in the subject.\nComposition: single sprite only, centered, full body visible, front-facing or three-quarter battle pose, no scene, no battle backdrop, no UI, no labels.",
+  "reviewNote": "Purpose-built Moss Goblin sprite generated from the staged manifest prompt, chroma-keyed, normalized to 64x64, and visually reviewed on dark and light backgrounds."
+}

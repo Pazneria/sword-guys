@@ -1,0 +1,10 @@
+{
+  "assetId": "field_slime",
+  "targetPath": "public/assets/characters/enemies/field-slime.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a compact pixel-art battle sprite for Field Slime, a slime enemy from Greenhollow fields. Soft green blob, bright wet highlight, simple friendly-danger read. Transparent background, strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys enemy battle sprite source for background removal\nPrimary request: Create a compact pixel-art battle sprite for Field Slime, a slime enemy from Greenhollow fields. Soft green blob, bright wet highlight, simple friendly-danger read. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.\nSubject: A single small green field slime, rounded blob body, soft friendly-danger expression, glossy highlight, a few simple pixel clusters suggesting grassland freshness. Keep it centered with generous padding and no props.\nStyle: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited palette, clean edges, no anti-aliased painterly rendering.\nBackground: perfectly flat solid #ff00ff chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff anywhere in the subject.\nComposition: single sprite only, centered, full body visible, no scene, no battle backdrop, no UI, no labels.",
+  "reviewNote": "Purpose-built Field Slime sprite generated from the staged manifest prompt, chroma-keyed, normalized to 64x64, and visually reviewed in the asset QA gallery."
+}

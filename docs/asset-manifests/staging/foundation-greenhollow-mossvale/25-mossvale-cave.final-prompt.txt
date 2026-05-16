@@ -1,0 +1,7 @@
+Use case: game-asset
+Asset type: Sword Guys environment tileset, transparent PNG source
+Primary request: Create a pixel-art top-down RPG environment tileset for Mossvale Cave. It must read as a 32x32 grid tile atlas with individual cave floor, moss glow, shallow pools, cliff walls, stairs, chest, and small cave props. No labels, no text, no watermark.
+Canvas/composition: square transparent-background tile atlas, ideally 512x512 with a clear 16 columns by 16 rows implied grid, each cell designed as a standalone 32x32 tile. Leave transparent padding around irregular props where appropriate. Avoid a single perspective scene; this must be a tile sheet.
+Tiles needed: multiple seamless brown cave floor variants, darker cracked floor, mossy floor, shallow blue water edge and pool tiles, rock wall top/side/corner pieces, cliff ledge pieces, moss clusters, small glowing mushrooms, stairs, closed treasure chest, open treasure chest, rocks, stalagmites, puddle accents, cave entrance/dark void tiles.
+Style/medium: crisp 2D pixel-art JRPG tileset, production-ready game asset, orthographic top-down readability, collision-friendly props, gentle first-dungeon colors, no painterly blur, no recycled or other-project-looking art.
+Technical constraints: transparent background outside tile art, no white paper background, no drop shadow outside tiles, no perspective room scene, no characters, no enemies, no readable text, no labels, no watermark. Tile boundaries should visually align to a 32x32 grid.

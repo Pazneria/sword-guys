@@ -1,0 +1,10 @@
+{
+  "assetId": "ironvein_fortress",
+  "targetPath": "public/assets/environment/ironvein-fortress-tiles.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a 32x32-tile pixel-art environment tileset for Ironvein Fortress. Steel floors, furnace walls, heavy doors, machinery props. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.",
+  "finalPrompt": "Create a 32x32-tile pixel-art environment tileset for Ironvein Fortress. Steel floors, furnace walls, heavy doors, machinery props. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}
