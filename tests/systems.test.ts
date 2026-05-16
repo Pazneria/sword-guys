@@ -752,25 +752,18 @@ describe('inn interiors', () => {
   });
 });
 
-describe('opening cutscene', () => {
-  it('shows a one-time start cutscene that tells the player where to go', () => {
+describe('initial launch', () => {
+  it('starts directly in playable exploration with no title or intro gate', () => {
     const engine = new GameEngine(createInitialState());
     const root = { innerHTML: '', addEventListener: vi.fn() } as unknown as HTMLElement;
     const ui = new UIManager(root);
 
     ui.sync(engine);
-    expect(root.innerHTML).toContain('At dawn, the five roads went quiet.');
-    expect(engine.state.questFlags.introCutsceneSeen).toBe(true);
-
-    ui.handleExplorationActions({ ...blankInput, confirmPressed: true }, engine);
-    ui.handleExplorationActions({ ...blankInput, confirmPressed: true }, engine);
-    ui.sync(engine);
-    expect(root.innerHTML).toContain('Find Elder Rowan');
-    ui.handleExplorationActions({ ...blankInput, confirmPressed: true }, engine);
     expect(ui.overlay).toBe('none');
-
-    ui.sync(engine);
-    expect(root.innerHTML).not.toContain('At dawn, the five roads went quiet.');
+    expect(engine.state.currentMapId).toBe('greenhollow');
+    expect(engine.state.questFlags.introCutsceneSeen).toBeUndefined();
+    expect(root.innerHTML).not.toContain('dialogue-text');
+    expect(root.innerHTML).not.toContain('Sword Guys');
   });
 });
 

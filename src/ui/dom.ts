@@ -3,7 +3,7 @@ import { itemIconUrlForId } from '../game/items/icons';
 import { GameEngine } from '../game/simulation/engine';
 import { BattleState, InputActionState, InteractionResult, TILE_SIZE, TileLayerName } from '../game/types';
 
-type Overlay = 'none' | 'dialogue' | 'cutscene' | 'menu' | 'shop' | 'inn' | 'bedRest' | 'savePoint' | 'map' | 'battle' | 'ending';
+type Overlay = 'none' | 'dialogue' | 'menu' | 'shop' | 'inn' | 'bedRest' | 'savePoint' | 'map' | 'battle' | 'ending';
 type ShopMode = 'buy' | 'sell';
 type BattleMode = 'commands' | 'magic' | 'items' | 'targets';
 type UiOption = { id: string; label: string; meta: string; iconId?: string };
@@ -72,11 +72,6 @@ export class UIManager {
     if (result.type === 'none' && result.message) engine.setMessage(result.message);
   }
 
-  openCutscene(speaker: string, lines: string[]) {
-    this.overlay = 'cutscene';
-    this.dialogue = { speaker, lines, index: 0 };
-  }
-
   openMenu() {
     this.overlay = 'menu';
     this.menuTab = 0;
@@ -127,7 +122,6 @@ export class UIManager {
       return false;
     }
     if (this.overlay === 'dialogue') this.handleDialogue(actions);
-    if (this.overlay === 'cutscene') this.handleDialogue(actions);
     if (this.overlay === 'menu') this.handleMenu(actions, engine);
     if (this.overlay === 'shop') this.handleShop(actions, engine);
     if (this.overlay === 'inn') this.handleInn(actions, engine);
@@ -245,10 +239,6 @@ export class UIManager {
       this.endingClickAction = null;
     }
     this.noticeTimer = Math.max(0, this.noticeTimer - 16);
-    if (this.overlay === 'none') {
-      const intro = engine.startIntroCutscene();
-      if (intro) this.openCutscene(intro.speaker, intro.lines);
-    }
     if (engine.state.endingReached && this.overlay !== 'ending' && !engine.currentBattle) this.openEnding();
     const html = [this.renderHud(engine), this.renderOverlay(engine)].join('');
     if (html !== this.lastHtml) {
@@ -608,7 +598,6 @@ export class UIManager {
 
   private renderOverlay(engine: GameEngine) {
     if (this.overlay === 'dialogue') return this.renderDialogue();
-    if (this.overlay === 'cutscene') return this.renderCutscene();
     if (this.overlay === 'menu') return this.renderMenu(engine);
     if (this.overlay === 'shop') return this.renderShop(engine);
     if (this.overlay === 'inn') return this.renderConfirm('Rest', this.notice || `Rest for ${this.innCost}g?`);
@@ -623,16 +612,6 @@ export class UIManager {
   private renderDialogue() {
     return `
       <div class="dialogue">
-        <div class="speaker">${esc(this.dialogue.speaker)}</div>
-        <div class="dialogue-text">${esc(this.dialogue.lines[this.dialogue.index] ?? '')}</div>
-        <div class="advance">E / Enter</div>
-      </div>
-    `;
-  }
-
-  private renderCutscene() {
-    return `
-      <div class="cutscene">
         <div class="speaker">${esc(this.dialogue.speaker)}</div>
         <div class="dialogue-text">${esc(this.dialogue.lines[this.dialogue.index] ?? '')}</div>
         <div class="advance">E / Enter</div>

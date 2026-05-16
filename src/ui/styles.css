@@ -375,7 +375,6 @@ body {
 }
 
 .dialogue,
-.cutscene,
 .panel,
 .map-overlay,
 .battle-panel,
@@ -400,19 +399,6 @@ body {
   transform: translateX(-50%);
   border-radius: 8px;
   padding: 16px 18px;
-}
-
-.cutscene {
-  left: 50%;
-  bottom: 32px;
-  width: min(920px, calc(100vw - 32px));
-  min-height: 150px;
-  transform: translateX(-50%);
-  border-radius: 8px;
-  padding: 18px 20px;
-  background:
-    linear-gradient(180deg, rgba(22, 27, 34, 0.96), rgba(31, 38, 48, 0.92)),
-    var(--panel-strong);
 }
 
 .speaker {
@@ -818,8 +804,7 @@ body {
     height: 60px;
   }
 
-  .dialogue,
-  .cutscene {
+  .dialogue {
     bottom: 12px;
     min-height: 108px;
     padding: 12px 14px;

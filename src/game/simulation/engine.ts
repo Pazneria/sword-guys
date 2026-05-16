@@ -227,21 +227,6 @@ export class GameEngine {
     this.messageTimerMs = ms;
   }
 
-  startIntroCutscene() {
-    if (this.state.questFlags.introCutsceneSeen || this.state.endingReached || this.currentBattle) return null;
-    if (this.state.currentMapId !== START_MAP_ID) return null;
-    this.state.questFlags.introCutsceneSeen = true;
-    this.addLog('Objective: talk to Elder Rowan in Greenhollow.');
-    return {
-      speaker: 'Sword Guys',
-      lines: [
-        'At dawn, the five roads went quiet.',
-        'Greenhollow is safe for now, but the caves west of town have started glowing again.',
-        'Find Elder Rowan near the north path. Press E to talk, N to open the map, and prepare before leaving town.'
-      ]
-    };
-  }
-
   stepExploration(deltaMs: number, input: InputActionState, uiBlocking: boolean) {
     this.syncProgressionRoutes();
     if (input.debugPressed) this.debug = !this.debug;
