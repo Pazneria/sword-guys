@@ -1,0 +1,8 @@
+Use case: game-asset
+Asset type: Sword Guys 16:9 pixel-art JRPG battle backdrop, opaque PNG
+Primary request: Create a 16:9 pixel-art JRPG battle backdrop for Ironvein Fortress. Steel floor, furnace glow, heavy doors, industrial pressure. Leave readable floor/ground space for Ari on the left and enemies on the right, keep the lower UI area visually quiet, no characters, no text, no watermark.
+Scene details: exterior-to-interior fortress approach inside Ironvein, with iron-plated stone walls, riveted steel flooring, heavy sealed doors in the middle distance, furnace-orange glow from side vents, smoke-dark upper corners, hanging chains, pressure gauges without readable numbers, and industrial fortress weight. The scene should feel more military and engineered than the mine backdrop.
+Battle layout: leave clear readable ground/floor space on the left third for the player and on the right third for enemies. Keep the lower third darker, broad, and visually calm for the DOM battle UI. Avoid bright furnace pools or busy door seams directly behind the lower UI region.
+Style/medium: crisp 2D pixel-art JRPG battle background, production-ready game asset, widescreen 16:9 composition, controlled contrast, no painterly blur, no photorealism, no poster art.
+Composition/framing: wide battle backdrop only, camera facing into a fortress threshold or battle hall with depth and readable side staging areas. No characters, monsters, silhouettes, signs, labels, letters, UI, border, or watermark.
+Output constraints: opaque image, 16:9 landscape, suitable for normalization to 1600x900 PNG. Do not use transparent background. Do not include any foreground object that blocks the player or enemy staging areas.

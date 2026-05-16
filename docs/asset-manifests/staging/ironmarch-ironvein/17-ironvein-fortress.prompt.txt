@@ -1,0 +1,15 @@
+Asset: ironvein_fortress
+Kind: tileset
+Target: public/assets/environment/ironvein-fortress-tiles.png
+Receipt: public/assets/environment/ironvein-fortress-tiles.png.receipt.json
+
+Prompt:
+Create a 32x32-tile pixel-art environment tileset for Ironvein Fortress. Steel floors, furnace walls, heavy doors, machinery props. Orthographic top-down RPG readability, seamless ground variants, collision-friendly props, no labels, no text, no watermark.
+
+Output Contract: Tileset PNG with dimensions divisible by 32; each tile occupies a 32x32 grid cell.
+Runtime Use: Loaded as a tileset spritesheet for ironvein_fortress map rendering.
+Transparency: required
+Verification: Tile boundaries must align to the 32x32 grid. | Blocking props and walkable ground must remain visually distinct. | No labels, text, watermark, or perspective scene composition.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset ironvein_fortress --review-note "Purpose-built ironvein_fortress art reviewed in Sword Guys QA." --write

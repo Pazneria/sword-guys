@@ -1,8 +1,41 @@
 {
   "name": "sword-guys",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "goal:audit": "vite-node scripts/goal-audit.ts",
+    "balance:report": "vite-node scripts/balance-report.ts",
+    "items:economy": "vite-node scripts/item-economy-report.ts",
+    "items:icons": "vite-node scripts/generate-item-icons.ts",
+    "tilesets:usage": "vite-node scripts/tileset-usage-report.ts",
+    "content:matrix": "vite-node scripts/content-matrix.ts",
+    "assets:readiness": "vite-node scripts/assets-readiness.ts",
+    "assets:coverage": "vite-node scripts/assets-coverage.ts",
+    "assets:check": "vite-node scripts/assets-check.ts",
+    "assets:receipt": "vite-node scripts/assets-receipt.ts",
+    "assets:promote": "vite-node scripts/assets-promote.ts",
+    "assets:stage": "vite-node scripts/assets-stage.ts",
+    "assets:staging-check": "vite-node scripts/assets-stage.ts next --check",
+    "assets:export": "vite-node scripts/assets-export.ts",
+    "assets:export-all": "vite-node scripts/assets-export.ts all",
+    "assets:packets-check": "vite-node scripts/assets-export.ts all --check",
+    "assets:prompt": "vite-node scripts/assets-prompt.ts",
+    "assets:verify": "vite-node scripts/assets-verify.ts",
+    "qa:battle-backdrops": "vite-node scripts/battle-backdrop-qa.ts"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.1.4"
   }
 }

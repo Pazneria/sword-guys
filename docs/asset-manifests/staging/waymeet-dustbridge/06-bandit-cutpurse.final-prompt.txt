@@ -1,0 +1,8 @@
+Use case: game-asset
+Asset type: Sword Guys enemy battle sprite, transparent PNG source after chroma-key removal
+Primary request: Create a compact pixel-art battle sprite for Bandit Cutpurse, a human bandit enemy from Dustbridge road.
+Character details: wiry road bandit thief, red-brown short cloak, dusty leather hood or scarf, small curved dagger held low, quick crouched posture, narrow sly silhouette, travel-worn boots, small pouch at belt. Palette: dusty red-brown, tan leather, muted steel dagger. Distinct from all Waymeet NPCs and not a recolor.
+Style/medium: crisp 2D pixel art, JRPG battle enemy sprite, production-ready game asset, clean silhouette, limited Dustbridge road palette, no painterly blur.
+Composition/framing: single centered full-body enemy only, generous padding for a 64x64 normalized sprite crop.
+Background/removal: create the sprite on a perfectly flat solid #00ff00 chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Keep the subject fully separated from the background with crisp pixel-art edges. Do not use #00ff00 anywhere in the subject.
+Hard negative constraints: no browser chrome, no website screenshot, no UI, no toolbar, no text, no headings, no logos, no watermark, no page background, no cropped head, no multiple characters, no sprite sheet, no scenery, no battle backdrop, no labels, no cast shadow, no contact shadow, no reflection. Only the standalone pixel-art bandit enemy on the chroma-key background.

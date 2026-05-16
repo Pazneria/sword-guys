@@ -1,0 +1,15 @@
+Asset: sunflare
+Kind: spellEffect
+Target: public/assets/effects/spells/sunflare-strip.png
+Receipt: public/assets/effects/spells/sunflare-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for Sunflare. Golden late-game light burst, 12-frame beam flare and radiant impact. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 12 frames, 64x64 per frame, total 768x64.
+Runtime Use: Loaded as spell:sunflare spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset sunflare --review-note "Purpose-built sunflare art reviewed in Sword Guys QA." --write

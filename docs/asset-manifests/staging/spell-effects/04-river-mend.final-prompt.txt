@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: Sword Guys battle spell animation strip, final production art
+Primary request: Create a short pixel-art spell effect strip for River Mend.
+Subject: Water-light healing ring with blue ripple motion and white glints.
+Style/medium: Clean readable compact RPG pixel art, flowing water magic, no character art.
+Composition/framing: One horizontal row of 10 evenly spaced animation frames, each frame a centered 64x64 square. Start with a blue droplet sparkle, expand into a circular water ripple, add white healing glints, then fade. The final strip will be normalized to 640x64.
+Lighting/mood: Cool restorative river magic, distinct from Mend by using more watery ripple shapes.
+Color palette: Blue, cyan, pale aqua, white glints, very small deep-blue outline.
+Transparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.
+Constraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the effect centered and battle-readable.
+Avoid: Ocean scene, waves with horizon, character silhouettes, black background, labels, or oversized water splash.

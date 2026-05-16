@@ -1,0 +1,15 @@
+Asset: mend
+Kind: spellEffect
+Target: public/assets/effects/spells/mend-strip.png
+Receipt: public/assets/effects/spells/mend-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for Mend. Green-blue healing pulse, 8-frame expanding ring and soft sparkle. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 8 frames, 64x64 per frame, total 512x64.
+Runtime Use: Loaded as spell:mend spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset mend --review-note "Purpose-built mend art reviewed in Sword Guys QA." --write

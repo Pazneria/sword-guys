@@ -1,0 +1,9 @@
+Use case: game-asset
+Asset type: Sword Guys top-down RPG environment tileset, transparent PNG source after chroma-key cleanup
+Primary request: Create a 32x32-tile pixel-art environment tileset for Waymeet Trade Post. Market stalls, crates, road signs, caravan props, trade-road palette.
+Sheet layout: one complete tileset sheet arranged as a clean 10-column by 6-row grid, 60 total tile cells, intended to be normalized to 320x192 pixels with 32x32 cells. Each tile cell should contain one orthographic top-down RPG tile or prop. Keep tile contents centered inside each cell and aligned to the grid.
+Tile content mix: dusty trade-road ground variants, packed dirt path, wagon-track ground, scrubby edge grass, small stones, wooden market stall roof pieces, crate/barrel props, caravan wheel prop, canvas bundle, simple road sign silhouette with no lettering, fence/barricade fragments, town-edge floor/wall accents, collision-friendly large props, a few empty transparent cells for spacing.
+Style/medium: crisp 2D pixel art, orthographic top-down RPG tileset, production-ready browser game asset, clean 32x32 tile readability, no perspective scene composition, no isometric camera.
+Background/removal: build the sheet on a perfectly flat solid #00ff00 chroma-key background in any unused space and empty cells for transparency removal. The background must be one uniform color with no shadows, gradients, texture, floor plane, or lighting variation. Do not use #00ff00 inside the tile art itself.
+Color palette: dusty tan road, faded ochre cloth, weathered brown wood, muted gray stone, small scrub green accents.
+Hard negative constraints: no characters, no monsters, no animals, no readable text, no letters on signs, no labels, no logos, no watermark, no UI, no browser chrome, no website screenshot, no single scenic illustration, no perspective battle backdrop. Only a grid-aligned top-down tileset sheet.

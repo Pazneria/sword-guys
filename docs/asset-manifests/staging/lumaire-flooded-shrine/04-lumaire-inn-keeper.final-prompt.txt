@@ -1,0 +1,8 @@
+Use case: game-asset
+Asset type: Sword Guys 64x64 top-down overworld NPC sprite, transparent PNG source after chroma-key cleanup
+Primary request: Create a 64x64 top-down pixel RPG overworld NPC sprite for Lumaire Inn Keeper, innkeeper in Lumaire. Blue-green inn clothes, lantern, ferry-town hospitality. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.
+Character details: friendly adult innkeeper from a ferry-town inn, compact chibi/top-down RPG proportions, blue-green inn clothes with warm cloth apron, small lantern held close, welcoming posture, soft hospitality expression, distinct from the arcana shopkeeper and not a recolor.
+Style/medium: crisp 2D pixel art, JRPG overworld sprite, three-quarter top-down readability, production-ready game asset, clean silhouette, limited palette, no painterly blur.
+Composition/framing: single centered character only, feet near bottom-middle anchor, enough background margin for a 64x64 sprite crop. No scenery, no detached props, no shadow blob outside the sprite.
+Background/removal: build the sprite on a perfectly flat solid #00ff00 chroma-key background for transparency removal. The background must be one uniform color with no shadows, gradients, texture, checkerboard, floor plane, or lighting variation. Do not use #00ff00 anywhere in the character art.
+Technical constraints: no scenery, no labels, no readable text, no watermark, no poster framing, no multiple characters, no sprite sheet; just one full-body NPC sprite.

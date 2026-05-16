@@ -1,0 +1,15 @@
+Asset: spark
+Kind: spellEffect
+Target: public/assets/effects/spells/spark-strip.png
+Receipt: public/assets/effects/spells/spark-strip.png.receipt.json
+
+Prompt:
+Create a short transparent pixel-art spell effect strip for Spark. Fast yellow lightning bolt, 6-frame projectile and hit flash. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.
+
+Output Contract: Horizontal transparent spell strip, 6 frames, 64x64 per frame, total 384x64.
+Runtime Use: Loaded as spell:spark spritesheet and played before the procedural fallback.
+Transparency: required
+Verification: Frames must be evenly spaced with no gutters unless the strip is normalized afterward. | Effect must not obscure enemy HP bars or command feedback. | No character, scenery, label, text, or watermark.
+
+After saving the generated PNG at the target path:
+npm run assets:receipt -- --asset spark --review-note "Purpose-built spark art reviewed in Sword Guys QA." --write

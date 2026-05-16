@@ -1,0 +1,10 @@
+{
+  "assetId": "river_mend",
+  "targetPath": "public/assets/effects/spells/river-mend-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for River Mend. Water-light healing ring, 10-frame blue ripple and white glints. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Create a short transparent pixel-art spell effect strip for River Mend. Water-light healing ring, 10-frame blue ripple and white glints. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "reviewNote": "TODO: replace after in-game Sword Guys visual review"
+}

@@ -1,0 +1,7 @@
+Use case: game-asset
+Asset type: Sword Guys 64x64 top-down overworld NPC sprite, transparent PNG source
+Primary request: Create a 64x64 top-down pixel RPG overworld NPC sprite for Waymeet Outfitter keeper, outfitter shopkeeper in Waymeet. Tool belt, folded cloth, merchant vest, road-market palette. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.
+Character details: practical road-market outfitter shopkeeper, sturdy merchant vest over rolled sleeves, compact tool belt, small folded cloth bundle tucked under one arm, muted tan and rust colors with coin-brass accents, helpful but businesslike stance. Distinct from Broker Sel and Road Scout, not a recolor.
+Style/medium: crisp 2D pixel art, JRPG overworld sprite, three-quarter top-down readability, production-ready game asset, clean silhouette, limited road-market palette, no painterly blur.
+Composition/framing: single centered character only, feet near bottom-middle anchor, enough transparent margin for a 64x64 sprite crop. No background, no shadow blob outside sprite, no props detached from the character.
+Technical constraints: transparent background, no scenery, no labels, no readable text, no watermark, no poster framing, no multiple characters, no sprite sheet; just one full-body NPC sprite.

@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: Sword Guys battle spell animation strip, final production art
+Primary request: Create a short pixel-art spell effect strip for Mend.
+Subject: Green-blue healing pulse with an expanding ring and soft sparkles.
+Style/medium: Clean readable compact RPG pixel art, gentle healing magic, no character art.
+Composition/framing: One horizontal row of 8 evenly spaced animation frames, each frame a centered 64x64 square. Start with a small teal spark, expand into a green-blue ring, add a few white glints, then fade softly. The final strip will be normalized to 512x64.
+Lighting/mood: Calm restorative glow, readable at small battle scale.
+Color palette: Teal, aqua, soft green, pale white glints.
+Transparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.
+Constraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the effect compact enough that it will not hide command feedback.
+Avoid: Character silhouettes, medical symbols, black background, labels, panel text, or full-screen aura.

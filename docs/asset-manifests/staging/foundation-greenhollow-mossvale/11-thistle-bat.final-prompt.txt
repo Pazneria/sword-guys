@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: Sword Guys enemy battle sprite source for background removal
+Primary request: Create a compact pixel-art battle sprite for Thistle Bat, a beast enemy from the forest edge. Purple bat with thorny wing silhouette and tiny bright eyes. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.
+Subject: A single purpose-built Sword Guys thistle bat, small hovering bat body, wide thorn-shaped purple wings with jagged thistle-like points, tiny bright eyes, dark violet body, compact fangs, and a clear airborne silhouette. Keep it centered with generous padding and no props.
+Style: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited violet, purple, dark plum, and pale eye highlight palette, clean edges, no painterly rendering, no recycled or other-project-looking art.
+Background: perfectly flat solid #00ff00 chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #00ff00 anywhere in the subject.
+Composition: single sprite only, centered, full body visible, front-facing or three-quarter hovering battle pose, no scene, no battle backdrop, no UI, no labels.

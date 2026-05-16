@@ -1,0 +1,9 @@
+Use case: game-asset
+Asset type: Sword Guys 16:9 JRPG battle backdrop, opaque PNG source
+Primary request: Create a 16:9 pixel-art JRPG battle backdrop for Waymeet road. Dusty trade road, broken signpost, wagon tracks, bandit ambush mood.
+Scene/backdrop: a dusty trade road outside Waymeet, with tan wagon ruts crossing the foreground, scrub grass, small stones, a broken wooden signpost off to one side, distant low hills and sparse roadside brush. The space must feel like a bandit ambush route without showing any people.
+Composition/framing: wide 16:9 battle backdrop. Leave a readable ground/floor area on the left for Ari and on the right for enemies. Keep the lower third visually quiet for the DOM battle UI, with simple road dust and muted ground texture. Horizon and scenery should sit mostly in the upper half.
+Style/medium: crisp 2D pixel art, JRPG battle background, production-ready game backdrop, clean readable silhouettes, limited dusty Waymeet palette, no painterly blur.
+Lighting/mood: late-afternoon dusty warmth, slight tension, not too dark.
+Color palette: dusty tan road, faded ochre grass, weathered brown wood, muted blue-gray horizon, small green scrub accents.
+Hard negative constraints: no characters, no monsters, no animals, no vehicles, no UI, no browser chrome, no website screenshot, no text, no readable sign lettering, no labels, no logos, no watermark, no battle menu, no foreground object blocking the combat floor. Only the empty Waymeet road battle backdrop.

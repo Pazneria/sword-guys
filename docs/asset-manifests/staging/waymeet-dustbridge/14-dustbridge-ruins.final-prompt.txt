@@ -1,0 +1,9 @@
+Use case: game-asset
+Asset type: Sword Guys top-down RPG environment tileset, transparent PNG source after chroma-key cleanup
+Primary request: Create a 32x32-tile pixel-art environment tileset for Dustbridge Ruins. Broken roads, ruin walls, fake route seal props, barricades.
+Sheet layout: one complete tileset sheet arranged as a clean 10-column by 6-row grid, 60 total tile cells, intended to be normalized to 320x192 pixels with 32x32 cells. Each tile cell should contain one orthographic top-down RPG tile or prop. Keep tile contents centered inside each cell and aligned to the grid.
+Tile content mix: cracked stone floor variants, broken road tiles, ochre dust ground, ruined wall segments, broken bridge edge pieces, stair/threshold tile, rubble piles, old route-seal carved slabs with symbol only and no letters, barricade fragments, cracked columns, small chest/loot prop, collision-friendly large blocks, a few empty transparent cells for spacing.
+Style/medium: crisp 2D pixel art, orthographic top-down RPG dungeon/ruin tileset, production-ready browser game asset, clean 32x32 tile readability, no perspective scene composition, no isometric camera.
+Background/removal: build the sheet on a perfectly flat solid #00ff00 chroma-key background in any unused space and empty cells for transparency removal. The background must be one uniform color with no shadows, gradients, texture, floor plane, or lighting variation. Do not use #00ff00 inside the tile art itself.
+Color palette: ochre dust, tan cracked stone, muted gray-brown walls, faded route-seal gold accents, small dry grass details.
+Hard negative constraints: no characters, no monsters, no animals, no readable text, no letters on carved slabs, no labels, no logos, no watermark, no UI, no browser chrome, no website screenshot, no single scenic illustration, no perspective battle backdrop. Only a grid-aligned top-down tileset sheet.

@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: Sword Guys battle spell animation strip, final production art
+Primary request: Create a short pixel-art spell effect strip for Frost Rune.
+Subject: Blue-white icy sigil reveal followed by a sharp crystal impact.
+Style/medium: Clean readable compact RPG pixel art, angular ice magic, no character art.
+Composition/framing: One horizontal row of 10 evenly spaced animation frames, each frame a centered 64x64 square. Start with faint rune strokes, build into a blue-white sigil, then snap into a compact crystal burst and fade. The final strip will be normalized to 640x64.
+Lighting/mood: Cold precise spell, sharp crystalline readability.
+Color palette: Ice blue, deep blue outline, white highlights, faint pale-cyan glow.
+Transparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.
+Constraints: No readable letters, no frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the rune abstract and not language-like.
+Avoid: Alphabetic symbols, snowfield scene, black background, character hands, full-screen blizzard, or huge ice wall.

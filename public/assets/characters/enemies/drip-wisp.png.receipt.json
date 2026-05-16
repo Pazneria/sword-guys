@@ -1,0 +1,10 @@
+{
+  "assetId": "drip_wisp",
+  "targetPath": "public/assets/characters/enemies/drip-wisp.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a compact pixel-art battle sprite for Drip Wisp, a spirit enemy from Mossvale Cave. Floating blue water-drop ghost with faint glow. Transparent background, strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys enemy battle sprite source for background removal\nPrimary request: Create a compact pixel-art battle sprite for Drip Wisp, a spirit enemy from Mossvale Cave. Floating blue water-drop ghost with faint glow. Strong silhouette, readable at 3x battle scale, no scenery, no text, no watermark.\nSubject: A single purpose-built Sword Guys drip wisp, floating blue water-drop ghost shape, small bright eyes, faint cave-water glow, soft dripping lower edge, translucent-looking but still opaque enough for a clean sprite silhouette, distinct from a generic flame or slime. Keep it centered with generous padding and no props.\nStyle: crisp 2D pixel-art RPG battle sprite, compact readable silhouette, limited cyan, blue, deep teal, and pale glow palette, clean edges, no painterly rendering, no recycled or other-project-looking art.\nBackground: perfectly flat solid #ff00ff chroma-key background for background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff anywhere in the subject.\nComposition: single sprite only, centered, full body visible, hovering three-quarter battle pose, no scene, no battle backdrop, no UI, no labels.",
+  "reviewNote": "Purpose-built Drip Wisp sprite generated from the staged manifest prompt, chroma-keyed, normalized to 64x64, and visually reviewed on dark and light backgrounds."
+}

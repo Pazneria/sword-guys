@@ -1,0 +1,10 @@
+{
+  "assetId": "river_mend",
+  "targetPath": "public/assets/effects/spells/river-mend-strip.png",
+  "source": "purpose-built-imagegen",
+  "generatedFor": "sword-guys",
+  "createdWith": "built-in-image-gen",
+  "manifestPrompt": "Create a short transparent pixel-art spell effect strip for River Mend. Water-light healing ring, 10-frame blue ripple and white glints. Evenly spaced frames, centered impact/cast effect, crisp edges, no character, no scenery, no text, no watermark.",
+  "finalPrompt": "Use case: stylized-concept\nAsset type: Sword Guys battle spell animation strip, final production art\nPrimary request: Create a short pixel-art spell effect strip for River Mend.\nSubject: Water-light healing ring with blue ripple motion and white glints.\nStyle/medium: Clean readable compact RPG pixel art, flowing water magic, no character art.\nComposition/framing: One horizontal row of 10 evenly spaced animation frames, each frame a centered 64x64 square. Start with a blue droplet sparkle, expand into a circular water ripple, add white healing glints, then fade. The final strip will be normalized to 640x64.\nLighting/mood: Cool restorative river magic, distinct from Mend by using more watery ripple shapes.\nColor palette: Blue, cyan, pale aqua, white glints, very small deep-blue outline.\nTransparency plan: Put the entire strip on a perfectly flat solid #ff00ff chroma-key background for local removal. Do not use #ff00ff anywhere in the spell effect.\nConstraints: No frame labels, no text, no numbers, no character, no scenery, no UI, no watermark. Frames must stay evenly spaced in one row with no decorative borders. Keep the effect centered and battle-readable.\nAvoid: Ocean scene, waves with horizon, character silhouettes, black background, labels, or oversized water splash.",
+  "reviewNote": "Purpose-built River Mend spell effect strip generated from the staged manifest prompt, chroma-key-cleaned, normalized to a transparent 640x64 PNG with 10 evenly spaced 64x64 frames, and visually reviewed for blue water-light ripple readability, distinct healing identity from Mend, no text, no characters, and battle-UI-safe scale."
+}

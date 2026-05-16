@@ -1,0 +1,7 @@
+Use case: game-asset
+Asset type: Sword Guys 64x64 top-down overworld NPC sprite, transparent PNG source
+Primary request: Create a 64x64 top-down pixel RPG overworld NPC sprite for Road Scout, rumor scout in Waymeet. Dusty green road gear, satchel, short travel cloak, alert stance. Transparent background, crisp pixel-art clusters, readable face and outfit at 32px display scale, no scenery, no text, no watermark.
+Character details: lean travel scout from a dusty trade-road market town, muted olive-green road gear, short tan travel cloak, side satchel, wrapped boots, alert stance as if listening for road rumors. Distinct from Broker Sel and from Greenhollow villagers, not a recolor.
+Style/medium: crisp 2D pixel art, JRPG overworld sprite, three-quarter top-down readability, production-ready game asset, clean silhouette, limited road-market palette, no painterly blur.
+Composition/framing: single centered character only, feet near bottom-middle anchor, enough transparent margin for a 64x64 sprite crop. No background, no shadow blob outside sprite, no props detached from the character.
+Technical constraints: transparent background, no scenery, no labels, no readable text, no watermark, no poster framing, no multiple characters, no sprite sheet; just one full-body NPC sprite.
