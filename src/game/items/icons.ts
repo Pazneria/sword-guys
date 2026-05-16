@@ -1,6 +1,7 @@
 import { ITEMS, SHOPS, SPELLS } from '../content';
 import type { ItemCategory } from '../types';
 import { parsePngInfo, PngInfo } from '../assets/png';
+import { publicAssetUrl } from '../assets/publicPath';
 
 export type ItemIconOwnerKind = 'item' | 'spell';
 
@@ -47,7 +48,6 @@ export interface ItemIconCoverageReport {
 }
 
 const uniqueSorted = (values: string[]) => [...new Set(values)].sort();
-const publicUrl = (targetPath: string) => `/${targetPath.replace(/^public\//, '')}`;
 const itemIconPath = (id: string) => `public/assets/items/${id.replaceAll('_', '-')}.png`;
 
 const itemVisual = (id: string, category: ItemCategory) => {
@@ -92,7 +92,7 @@ const buildIconAsset = (
     name,
     category,
     targetPath,
-    url: publicUrl(targetPath),
+    url: publicAssetUrl(targetPath),
     runtimeKey: `item:${id}`,
     prompt: `Create a 48x48 transparent pixel-art inventory icon for Sword Guys: ${name}. ${visual}. Centered object, crisp outline, readable at 24px UI scale, no scenery, no text, no watermark.`,
     production: {

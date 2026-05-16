@@ -3,6 +3,7 @@ import { readActions, createActionKeys, ActionKeys } from '../../game/input/acti
 import { getGameEngine, RuntimeEnemy } from '../../game/simulation/engine';
 import { MapObject, NPCDefinition, SleepVisualEffect, TILE_SIZE, TileLayerName } from '../../game/types';
 import { getUIManager, UIManager } from '../../ui/dom';
+import { publicAssetUrl, versionedPublicAssetUrl } from '../../game/assets/publicPath';
 import { runtimeAssetKeyForId } from '../../game/assets/runtime';
 import { loadApprovedImageGenAssets } from '../assetLoader';
 import { ACTOR_DEPTH, PLAYER_OVERWORLD_SCALE, npcOverworldRenderSpec } from '../actors';
@@ -64,20 +65,20 @@ export class WorldScene extends Phaser.Scene {
 
   preload() {
     loadApprovedImageGenAssets(this, ['npcSprite', 'enemySprite', 'battleBackdrop', 'tileset', 'spellEffect']);
-    this.load.spritesheet('player:overworld:idle', `/assets/characters/player/player-overworld-idle.png?v=${PLAYER_IDLE_ASSET_VERSION}`, {
+    this.load.spritesheet('player:overworld:idle', versionedPublicAssetUrl('public/assets/characters/player/player-overworld-idle.png', PLAYER_IDLE_ASSET_VERSION), {
       frameWidth: 64,
       frameHeight: 64
     });
-    this.load.spritesheet('player:overworld:walk', '/assets/characters/player/player-overworld-walk.png', {
+    this.load.spritesheet('player:overworld:walk', publicAssetUrl('public/assets/characters/player/player-overworld-walk.png'), {
       frameWidth: 64,
       frameHeight: 64
     });
-    this.load.spritesheet('player:overworld:walk:south', '/assets/characters/player/player-overworld-walk-south.png', {
+    this.load.spritesheet('player:overworld:walk:south', publicAssetUrl('public/assets/characters/player/player-overworld-walk-south.png'), {
       frameWidth: 64,
       frameHeight: 64
     });
-    this.load.image('environment:overworld-tree-imagegen', `/assets/environment/overworld-tree-imagegen.png?v=${OVERWORLD_TREE_IMAGEGEN_ASSET_VERSION}`);
-    this.load.image('environment:overworld-bush-imagegen', `/assets/environment/overworld-bush-imagegen.png?v=${OVERWORLD_BUSH_IMAGEGEN_ASSET_VERSION}`);
+    this.load.image('environment:overworld-tree-imagegen', versionedPublicAssetUrl('public/assets/environment/overworld-tree-imagegen.png', OVERWORLD_TREE_IMAGEGEN_ASSET_VERSION));
+    this.load.image('environment:overworld-bush-imagegen', versionedPublicAssetUrl('public/assets/environment/overworld-bush-imagegen.png', OVERWORLD_BUSH_IMAGEGEN_ASSET_VERSION));
   }
 
   create() {

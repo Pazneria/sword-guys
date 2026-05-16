@@ -1,5 +1,6 @@
 import { AssetKind, AssetStatus, IMAGE_GEN_ASSETS, ImageGenAssetEntry } from './manifest';
 import { ITEM_ICON_ASSETS, ItemIconAsset } from '../items/icons';
+import { publicAssetUrl } from './publicPath';
 
 export type RuntimeAssetKind = AssetKind | 'itemIcon';
 export type RuntimeAssetLoader = 'image' | 'spritesheet';
@@ -28,8 +29,6 @@ export interface SpellEffectRuntimeSpec {
 
 const LOADABLE_STATUSES = new Set<AssetStatus>(['approved']);
 
-const publicUrl = (targetPath: string) => `/${targetPath.replace(/^public\//, '')}`;
-
 const tileRuntimeKey: Record<string, string> = {
   greenhollow: 'tiles:greenhollow',
   overworld_main: 'tiles:overworld-greenhollow',
@@ -44,11 +43,11 @@ const runtimeLoadForEntry = (entry: ImageGenAssetEntry): RuntimeAssetLoad | null
   if (!LOADABLE_STATUSES.has(entry.status) || !entry.targetPath.startsWith('public/')) return null;
 
   if (entry.kind === 'battleBackdrop') {
-    return { id: entry.id, kind: entry.kind, key: `backdrop:${entry.id}`, targetPath: entry.targetPath, url: publicUrl(entry.targetPath), loader: 'image' };
+    return { id: entry.id, kind: entry.kind, key: `backdrop:${entry.id}`, targetPath: entry.targetPath, url: publicAssetUrl(entry.targetPath), loader: 'image' };
   }
 
   if (entry.kind === 'enemySprite') {
-    return { id: entry.id, kind: entry.kind, key: `enemy:${entry.id}`, targetPath: entry.targetPath, url: publicUrl(entry.targetPath), loader: 'image' };
+    return { id: entry.id, kind: entry.kind, key: `enemy:${entry.id}`, targetPath: entry.targetPath, url: publicAssetUrl(entry.targetPath), loader: 'image' };
   }
 
   if (entry.kind === 'npcSprite') {
@@ -58,13 +57,13 @@ const runtimeLoadForEntry = (entry: ImageGenAssetEntry): RuntimeAssetLoad | null
         kind: entry.kind,
         key: 'npc:greenhollow:npcs',
         targetPath: entry.targetPath,
-        url: publicUrl(entry.targetPath),
+        url: publicAssetUrl(entry.targetPath),
         loader: 'spritesheet',
         frameWidth: 64,
         frameHeight: 64
       };
     }
-    return { id: entry.id, kind: entry.kind, key: `npc:${entry.id}`, targetPath: entry.targetPath, url: publicUrl(entry.targetPath), loader: 'image' };
+    return { id: entry.id, kind: entry.kind, key: `npc:${entry.id}`, targetPath: entry.targetPath, url: publicAssetUrl(entry.targetPath), loader: 'image' };
   }
 
   if (entry.kind === 'tileset') {
@@ -73,7 +72,7 @@ const runtimeLoadForEntry = (entry: ImageGenAssetEntry): RuntimeAssetLoad | null
       kind: entry.kind,
       key: tileRuntimeKey[entry.id] ?? `tiles:${entry.id}`,
       targetPath: entry.targetPath,
-      url: publicUrl(entry.targetPath),
+      url: publicAssetUrl(entry.targetPath),
       loader: 'spritesheet',
       frameWidth: entry.frameWidth ?? 32,
       frameHeight: entry.frameHeight ?? 32
@@ -86,7 +85,7 @@ const runtimeLoadForEntry = (entry: ImageGenAssetEntry): RuntimeAssetLoad | null
       kind: entry.kind,
       key: `spell:${entry.id}`,
       targetPath: entry.targetPath,
-      url: publicUrl(entry.targetPath),
+      url: publicAssetUrl(entry.targetPath),
       loader: 'spritesheet',
       frameWidth: entry.frameWidth ?? 64,
       frameHeight: entry.frameHeight ?? 64,

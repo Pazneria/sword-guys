@@ -1,6 +1,7 @@
 import { buildAssetOutputContract } from './contracts';
 import { IMAGE_GEN_ASSETS, ImageGenAssetEntry } from './manifest';
 import { parsePngInfo, PngInfo } from './png';
+import { publicAssetUrl } from './publicPath';
 
 export interface AssetPngExpectation {
   width?: number;
@@ -128,7 +129,7 @@ export const verifyApprovedAssetFiles = async (
 
 export const verifyApprovedAssetUrls = () =>
   verifyApprovedAssetFiles(async (targetPath) => {
-    const response = await fetch(`/${targetPath.replace(/^public\//, '')}`);
+    const response = await fetch(publicAssetUrl(targetPath));
     if (!response.ok) return null;
     return new Uint8Array(await response.arrayBuffer());
   });

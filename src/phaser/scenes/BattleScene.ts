@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { versionedPublicAssetUrl } from '../../game/assets/publicPath';
 import { spellEffectRuntimeSpecForId } from '../../game/assets/runtime';
 import { createActionKeys, readActions, ActionKeys } from '../../game/input/actions';
 import { getGameEngine } from '../../game/simulation/engine';
@@ -32,7 +33,7 @@ export class BattleScene extends Phaser.Scene {
   preload() {
     loadApprovedImageGenAssets(this, ['battleBackdrop', 'enemySprite', 'spellEffect']);
     if (!this.textures.exists('player:overworld:idle')) {
-      this.load.spritesheet('player:overworld:idle', `/assets/characters/player/player-overworld-idle.png?v=${PLAYER_IDLE_ASSET_VERSION}`, {
+      this.load.spritesheet('player:overworld:idle', versionedPublicAssetUrl('public/assets/characters/player/player-overworld-idle.png', PLAYER_IDLE_ASSET_VERSION), {
         frameWidth: 64,
         frameHeight: 64
       });
