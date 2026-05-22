@@ -10,6 +10,7 @@ const args = process.argv.slice(2);
 const includeApproved = args.includes('--include-approved');
 const checkOnly = args.includes('--check');
 const batchId = args.find((arg) => !arg.startsWith('--')) as AssetGenerationBatchId | undefined;
+const normalizeLineEndings = (value: string) => value.replace(/\r\n/g, '\n');
 
 if (!batchId || batchId === 'list') {
   console.log('Available asset batches:');
@@ -37,7 +38,7 @@ try {
         process.exitCode = 1;
         continue;
       }
-      if (current !== expected) {
+      if (normalizeLineEndings(current) !== expected) {
         console.error(`Stale docs/asset-manifests/batches/${id}.md`);
         process.exitCode = 1;
       } else {
