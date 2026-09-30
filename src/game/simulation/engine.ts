@@ -204,7 +204,11 @@ export class GameEngine {
   constructor(state = createInitialState()) {
     this.state = state;
     this.loadRuntimeEnemies(state.currentMapId);
-    if (!this.state.checkpoint) this.createCheckpoint('Starting checkpoint saved.');
+    if (!this.state.checkpoint) {
+      let persistStartingCheckpoint = false;
+      try { persistStartingCheckpoint = localStorage.getItem(SAVE_KEY) === null; } catch { /* Keep an unreadable slot intact. */ }
+      this.createCheckpoint('Starting checkpoint saved.', persistStartingCheckpoint);
+    }
     this.refreshPlayerStats();
   }
 
@@ -362,13 +366,13 @@ export class GameEngine {
     return visual;
   }
 
-  createCheckpoint(message = 'Game saved.') {
+  createCheckpoint(message = 'Game saved.', persist = true) {
     const state = cloneData(this.state);
     state.checkpoint = null;
     const snapshot: SaveSnapshot = { version: CHECKPOINT_VERSION, savedAt: new Date().toISOString(), state };
     this.state.checkpoint = snapshot;
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+      if (persist) localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
     } catch {
       // Local storage can be blocked in private contexts; the in-memory checkpoint still works.
     }

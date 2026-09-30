@@ -353,30 +353,47 @@ export class WorldScene extends Phaser.Scene {
       camera.stopFollow();
       const worldWidth = map.width * TILE_SIZE;
       const worldHeight = map.height * TILE_SIZE;
-      const viewWidth = this.scale.width / zoom;
-      const viewHeight = this.scale.height / zoom;
+      const viewWidth = camera.width / zoom;
+      const viewHeight = camera.height / zoom;
       camera.setScroll((worldWidth - viewWidth) / 2, (worldHeight - viewHeight) / 2);
     }
   }
 
   private cameraZoom() {
     const map = this.engine.map;
-    const width = Math.max(1, this.scale.width);
-    const height = Math.max(1, this.scale.height);
+    const width = Math.max(1, this.cameras.main.width);
+    const height = Math.max(1, this.cameras.main.height);
     if (map.cameraMode === 'smoothFollow') return Math.min(2, Math.max(0.75, Math.min(width / 900, height / 620) + 0.45));
     const fit = Math.min(width / (FIXED_SCREEN_TILES.width * TILE_SIZE), height / (FIXED_SCREEN_TILES.height * TILE_SIZE));
-    return Math.max(0.45, Math.min(5, fit));
+    return Math.max(document.documentElement.classList.contains('has-touch-controls') ? 0.3 : 0.45, Math.min(5, fit));
   }
 
   private resizeCameraViewport() {
-    this.cameras.main.setViewport(0, 0, Math.max(1, this.scale.width), Math.max(1, this.scale.height));
+    let left = 0;
+    let width = Math.max(1, this.scale.width);
+    let top = 0;
+    let height = Math.max(1, this.scale.height);
+    if (document.documentElement.classList.contains('has-touch-controls')) {
+      const controls = document.getElementById('touch-controls');
+      top = (controls?.querySelector('.touch-toolbar')?.getBoundingClientRect().bottom ?? 52) + 8;
+      const bottom = (controls?.querySelector('.touch-dpad')?.getBoundingClientRect().top ?? height - 164) - 12;
+      const available = Math.max(1, bottom - top);
+      if (this.engine.map.cameraMode === 'smoothFollow') height = available;
+      else {
+        width = Math.min(width, available * FIXED_SCREEN_TILES.width / FIXED_SCREEN_TILES.height);
+        height = width * FIXED_SCREEN_TILES.height / FIXED_SCREEN_TILES.width;
+        left = (this.scale.width - width) / 2;
+      }
+      top += (available - height) / 2;
+    }
+    this.cameras.main.setViewport(left, top, width, height);
   }
 
   private cameraWorldView() {
     const camera = this.cameras.main;
     const zoom = camera.zoom || this.cameraZoom();
-    const fallbackWidth = Math.max(1, this.scale.width / zoom);
-    const fallbackHeight = Math.max(1, this.scale.height / zoom);
+    const fallbackWidth = Math.max(1, camera.width / zoom);
+    const fallbackHeight = Math.max(1, camera.height / zoom);
     return {
       x: Number.isFinite(camera.worldView.x) ? camera.worldView.x : camera.scrollX,
       y: Number.isFinite(camera.worldView.y) ? camera.worldView.y : camera.scrollY,

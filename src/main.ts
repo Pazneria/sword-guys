@@ -17,6 +17,10 @@ import { getGameEngine } from './game/simulation/engine';
 import { BattleScene } from './phaser/scenes/BattleScene';
 import { WorldScene } from './phaser/scenes/WorldScene';
 import { installAssetQaPanel, renderAssetQaPanel } from './ui/assetQa';
+import { installTouchControls } from './game/input/touch';
+import { installSessionControls, resumeSavedGameOnBoot } from './ui/session';
+
+resumeSavedGameOnBoot();
 
 if (import.meta.env.DEV) {
   const params = new URLSearchParams(window.location.search);
@@ -43,6 +47,9 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+const touchControls = installTouchControls();
+installSessionControls(game, touchControls.reset);
+game.events.once(Phaser.Core.Events.DESTROY, touchControls.destroy);
 
 if (import.meta.env.DEV) {
   const restartScene = (sceneKey: 'WorldScene' | 'BattleScene') => {
