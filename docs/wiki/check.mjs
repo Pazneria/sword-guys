@@ -23,7 +23,8 @@ for (const match of html.matchAll(/<a\b([^>]+)>/g)) {
 }
 assert.match(css, /:focus-visible/);
 assert.match(css, /prefers-reduced-motion/);
-assert.match(html, /81bcfe25a907478c1640667295e5d4bb480e3b16/);
+const reviewedRevision = 'bc97b4f32a81edf3a694556b3e5de3bdfdf10958';
+assert.ok(html.includes(reviewedRevision), 'Missing reviewed mobile/save revision');
 
 let localLinks = 0;
 let sourceLinks = 0;
@@ -33,7 +34,7 @@ for (const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
     assert.ok(ids.includes(value.slice(1)), `Missing anchor ${value}`);
   } else if (/^https:\/\//.test(value)) {
     assert.ok(value.startsWith('https://github.com/Pazneria/sword-guys/'), `Unexpected remote link ${value}`);
-    assert.ok(value.includes('81bcfe25a907478c1640667295e5d4bb480e3b16'), `Unpinned source link ${value}`);
+    assert.ok(value.includes(reviewedRevision), `Unpinned source link ${value}`);
     sourceLinks++;
   } else {
     assert.ok(!value.startsWith('/'), `Absolute URL would break project subpath: ${value}`);
