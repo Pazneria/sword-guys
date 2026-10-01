@@ -23,8 +23,8 @@ for (const match of html.matchAll(/<a\b([^>]+)>/g)) {
 }
 assert.match(css, /:focus-visible/);
 assert.match(css, /prefers-reduced-motion/);
-const reviewedRevision = 'bc97b4f32a81edf3a694556b3e5de3bdfdf10958';
-assert.ok(html.includes(reviewedRevision), 'Missing reviewed mobile/save revision');
+const reviewedRevision = 'ee21b89ac970d7c99426b206c9fca1060c468b64';
+assert.ok(html.includes(reviewedRevision), 'Missing reviewed published revision');
 
 let localLinks = 0;
 let sourceLinks = 0;
