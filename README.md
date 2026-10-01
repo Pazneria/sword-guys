@@ -2,6 +2,10 @@
 
 Fresh rebuild of **Sword Guys** as a fullscreen browser RPG foundation.
 
+## Player Guide
+
+The static [player guide](public/wiki/index.html) covers current controls, the Five Roads route, combat, progression, and checkpoint limits. Its GitHub Pages route is `wiki/` relative to the game root. See [wiki maintenance and integration](docs/WIKI.md) for the reviewed source revision and validation commands.
+
 ## Run
 
 ```bash

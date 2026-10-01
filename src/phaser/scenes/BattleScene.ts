@@ -70,11 +70,12 @@ export class BattleScene extends Phaser.Scene {
 
   update() {
     if (this.returningToWorld) return;
+    const actions = readActions(this.keys);
     if (this.battleAnimating) {
+      this.ui.clearPendingActions();
       this.ui.sync(this.engine);
       return;
     }
-    const actions = readActions(this.keys);
     if (import.meta.env.DEV && actions.playtestPowerPressed) this.engine.grantPlaytestPower();
     if (import.meta.env.DEV && actions.playtestRoutesPressed) this.engine.grantPlaytestPower({ unlockRoutes: true });
     const result = this.ui.handleBattleActions(actions, this.engine);

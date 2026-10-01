@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A source-checked Sword Guys player guide: first steps, keyboard and touch controls, Five Roads objectives, turn-based battles, equipment, spells, pause, and local saves.">
+  <title>Sword Guys — Player Guide</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to player guide</a>
+  <header class="site-header">
+    <a class="brand" href="#top"><img src="../assets/items/wooden-sword.png" width="32" height="32" alt="">Sword Guys <span>Player guide</span></a>
+    <a class="game-link" href="../" target="_blank" rel="noopener">Open game <span aria-hidden="true">↗</span><span class="sr-only"> in a new tab</span></a>
+  </header>
+
+  <div class="layout" id="top">
+    <nav class="contents" aria-label="Guide sections">
+      <p class="eyebrow">In this guide</p>
+      <a href="#first-steps">01 <span>First steps</span></a>
+      <a href="#controls">02 <span>Controls</span></a>
+      <a href="#exploration">03 <span>Finding your way</span></a>
+      <a href="#combat">04 <span>Combat</span></a>
+      <a href="#progression">05 <span>Gear &amp; magic</span></a>
+      <a href="#five-roads">06 <span>The Five Roads</span></a>
+      <a href="#saves">07 <span>Saves &amp; defeat</span></a>
+      <a href="#limits">08 <span>Settings &amp; limits</span></a>
+      <a href="#sources">09 <span>About this edition</span></a>
+      <div class="nav-note"><strong>Save before closing.</strong><br><a href="#session-controls">Pause</a> keeps the current session; <a href="#saves">Save</a> keeps progress for next time.</div>
+    </nav>
+
+    <main id="main" tabindex="-1">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">The Five Roads · Field guide</p>
+          <h1>Your first road<br>starts here.</h1>
+          <p class="hero-intro">Play as Ari. Explore five villages, recover the Cave Relic, and work toward the final battle in Eclipse Tower.</p>
+          <a class="primary-link" href="#first-steps">Learn the first steps <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="hero-art" aria-hidden="true"><img src="../assets/items/iron-sword.png" width="144" height="144" alt=""><span>Explore. Prepare. Take a turn.</span></div>
+        <div class="hero-meta"><span>Single-player browser RPG</span><span>Turn-based battles</span><span>Source checked · 30 Sep 2026</span></div>
+      </div>
+
+      <aside class="note" aria-label="Saving your progress">
+        <strong>Save before closing or reloading the game.</strong>
+        <p>A valid local save resumes automatically when you return. Pause and Exit do not save recent changes. <a href="#saves">How saves work →</a></p>
+      </aside>
+
+      <section id="first-steps" aria-labelledby="first-steps-title">
+        <div class="section-heading"><span>01</span><h2 id="first-steps-title">First steps</h2></div>
+        <p>You begin at level 1 in Greenhollow with 55 gold, starter equipment, three Small Potions, an Antidote, and the spells Spark and Mend. The goal is to finish the Five Roads story; there is no score or leaderboard.</p>
+        <ol class="steps">
+          <li><strong>Talk to Elder Rowan.</strong> He is north of your starting position. Stand next to him, face him, and tap <strong>OK</strong> or press <kbd>E</kbd>, <kbd>Enter</kbd>, or <kbd>Space</kbd>. Confirm advances each dialogue line.</li>
+          <li><strong>Check your map.</strong> Tap <strong>Map</strong> or press <kbd>N</kbd> to see your current area, the next objective, and its destination. In Greenhollow, the shop is at the northwest house and the inn at the northeast house; the exit is at the south edge.</li>
+          <li><strong>Recover the Cave Relic.</strong> Leave town and head to Mossvale Cave, northeast of Greenhollow on the current overworld map (tile 23, 10). Travel through the Cave Mouth and Glowcap Split to the Relic Grotto. Interact with the relic chest.</li>
+          <li><strong>Return to Rowan.</strong> He opens the Waymeet route and gives you 70 gold and an Iron Sword. Open the Equipment tab and equip the sword; receiving an upgrade does not replace your equipped weapon.</li>
+          <li><strong>Prepare for the next road.</strong> Heal with Mend or a potion, rest at the inn when needed, and make a checkpoint before leaving. Follow the map objective to the Wounded Courier and then Broker Sel.</li>
+        </ol>
+        <p class="tip"><strong>Two useful details:</strong> Rowan calls it the “west cave,” but the current map places it northeast of Greenhollow. The optional chest in Mossvale Glowcap Split contains a Leather Cap; equip it from the menu.</p>
+      </section>
+
+      <section id="controls" aria-labelledby="controls-title">
+        <div class="section-heading"><span>02</span><h2 id="controls-title">Controls</h2></div>
+        <p>Touch controls appear when the device reports touch capability or a coarse pointer. Keyboard controls remain available; a normal desktop also shows a Pause button.</p>
+        <div class="two-column" id="mobile-controls">
+          <div><h3>Touch movement and interaction</h3><p>Hold any of the eight directional arrows to move; the four corner arrows move diagonally. Slide between arrows to change direction. A short directional tap turns Ari toward a person or object. You can hold movement with one finger and press <strong>OK</strong> with a second finger; releasing either finger does not release the other.</p><p><strong>OK</strong> interacts or confirms. <strong>Back</strong> cancels or backs out. OK, Back, Menu, and Map act once per press rather than repeating while held. Dialogue has <strong>Next / OK</strong> and <strong>Close</strong>; rest, sleep, and save prompts have <strong>Confirm</strong> and <strong>Cancel</strong>.</p></div>
+          <div><h3>Touch menus and map</h3><p>Tap <strong>Menu</strong>, then tap a tab or entry directly. Swipe the tab strip to reach later tabs; lists and panels scroll. Tapping an item uses it, equipment equips it, and a spell casts it under the existing rules. Direction taps plus OK are another way to select and act. Back or <strong>Close menu</strong> closes it; Menu also closes an open exploration overlay.</p><p><strong>Map</strong> opens the exploration map. Map, OK, Back, or <strong>Close map</strong> closes it. Menu and Map are disabled during battle. Use the tappable battle commands described <a href="#combat">below</a>.</p></div>
+        </div>
+        <p>These are the keyboard bindings. The same direction keys navigate menus and battle choices.</p>
+        <table>
+          <caption>Keyboard reference</caption>
+          <thead><tr><th scope="col">Action</th><th scope="col">Keys</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Move / navigate</th><td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys</td></tr>
+            <tr><th scope="row">Interact / confirm</th><td><kbd>E</kbd>, <kbd>Enter</kbd>, or <kbd>Space</kbd></td></tr>
+            <tr><th scope="row">Cancel / back</th><td><kbd>Esc</kbd> or <kbd>Backspace</kbd></td></tr>
+            <tr><th scope="row">Open menu</th><td><kbd>M</kbd> or <kbd>Tab</kbd></td></tr>
+            <tr><th scope="row">Open map</th><td><kbd>N</kbd></td></tr>
+            <tr><th scope="row">Pause / resume</th><td><kbd>P</kbd> toggles pause. <kbd>Esc</kbd> resumes a paused/exit screen or cancels a checkpoint restart prompt.</td></tr>
+            <tr><th scope="row">Debug overlay</th><td><kbd>F3</kbd> toggles collision, transition, region, and enemy-range overlays.</td></tr>
+          </tbody>
+        </table>
+        <div class="two-column">
+          <div><h3>Menus and shops</h3><p>Left/right changes menu tabs; up/down selects a row; confirm acts; cancel closes. In a shop, left/right switches Buy and Sell. On the map, <kbd>N</kbd>, confirm, or cancel closes it.</p></div>
+          <div><h3>Facing and interaction</h3><p>Movement supports eight directions. From idle, a held direction turns Ari first, then moves after about 0.1 seconds. Face the person or object and look for the interaction prompt. Shop and inn counters allow talking across them.</p></div>
+        </div>
+        <div id="session-controls">
+          <h3>Pause, restart a checkpoint, or exit</h3>
+          <p><strong>Pause</strong> stops the active game scene, including battle, sleep, and fade animations. <strong>Resume</strong> returns to the same state. Changing focus or hiding the page also pauses; resume explicitly when you return.</p>
+          <p><strong>Pause → Restart checkpoint</strong> opens a confirmation. Confirming returns to the last in-memory checkpoint, clears any battle, and resumes exploration; progress since the checkpoint is lost. <strong>Cancel</strong> returns to Pause. This checkpoint restart preserves the persistent saved slot.</p>
+          <p><strong>Pause → Exit game</strong> stops play on an in-game exit screen. It does not close the browser or save unsaved progress. <strong>Return to game</strong> resumes the current in-memory session. Save from the exploration menu before closing or reloading to keep recent progress.</p>
+        </div>
+        <aside class="note"><strong>Portrait or landscape</strong><p>No orientation lock is required. Rotation, viewport changes, cancelled touches, and focus/visibility loss release held controls so movement does not stay stuck. Physical-phone and mobile Safari/WebKit behavior remains untested; the runtime owner's checks used Chromium phone emulation.</p></aside>
+      </section>
+
+      <section id="exploration" aria-labelledby="exploration-title">
+        <div class="section-heading"><span>03</span><h2 id="exploration-title">Finding your way</h2></div>
+        <p>The map is your main navigation aid. Its “Next” text names the current objective and, when needed, another destination map. The legend identifies you, goals, exits, enemies, and shop/save services. It shows the current area rather than a complete clickable world-travel screen.</p>
+        <div class="two-column">
+          <div><h3>Roads and rooms</h3><p>Walk onto an entrance, exit, or stair transition to move between areas. Locked routes show a message naming what remains to do. Dungeons have several rooms and optional treasure branches. Chests open once in the current progress state.</p></div>
+          <div><h3>Encounters and safe stops</h3><p>Moving through encounter zones can trigger random battles even when no enemy is visible. Touching a visible enemy also starts a battle; aggressive enemies may chase Ari. Village areas are safe. Opening dialogue, a menu, a shop, or the map pauses exploration and enemy movement.</p></div>
+        </div>
+        <p class="tip"><strong>If the objective seems behind you:</strong> speak to the road NPC it names. Road conversations update the objective even though the boss or key route gate may already be open.</p>
+      </section>
+
+      <section id="combat" aria-labelledby="combat-title">
+        <div class="section-heading"><span>04</span><h2 id="combat-title">Combat, one turn at a time</h2></div>
+        <p>Ari acts first. After a valid action, every surviving enemy takes an action, ordered by enemy speed. Battles wait for your command, so take time to choose. Defeating one target before its response removes its attack from that round.</p>
+        <dl class="command-list">
+          <div><dt>Attack</dt><dd>Choose a living target and confirm. Physical damage uses Ari’s Attack against that enemy’s Defense.</dd></div>
+          <div><dt>Magic</dt><dd>Select a learned spell. Damage spells then ask for a target; healing spells restore Ari’s HP. Casting costs MP. A missing spell or insufficient MP does not consume a turn.</dd></div>
+          <div><dt>Item</dt><dd>Select a usable inventory item. Using it consumes one item and a turn, including when your HP or MP is already full.</dd></div>
+          <div><dt>Defend</dt><dd>Reduces damage for the immediate enemy response. The physical damage formula halves its base damage before the small random addition; Defend does not heal Ari.</dd></div>
+          <div><dt>Run</dt><dd>Normal battles allow a 72% escape attempt. Failure gives enemies their response. The four story boss fights forbid escape. Cancel backs out of a submenu; at the main command screen it selects Run when escape is allowed, without attempting it.</dd></div>
+        </dl>
+        <p>On touch, tap <strong>Attack</strong> and then a living enemy target. Tap <strong>Magic</strong> and then a spell; damage spells need a target, while healing spells act directly. Tap <strong>Item</strong> and then an available item. <strong>Defend</strong> acts directly; <strong>Run</strong> is disabled when escape is forbidden. Back leaves target, spell, or item selection; from the main command grid it selects Run when allowed.</p>
+        <p>Direction keys or arrow taps plus OK remain an alternative. Tap <strong>Continue / OK</strong> after victory or escape to return to exploration. After defeat, OK restores the existing checkpoint. Touch and keyboard presses made during battle animations are discarded rather than saved for a later turn.</p>
+        <aside class="note"><strong>Read the HP bar, not just the item name.</strong><p>The Revive Charm restores 80 HP to a living Ari; it is not an automatic resurrection. Element names and descriptions do not currently apply weakness or resistance multipliers. Antidotes have a cure-status definition, but the reviewed battle simulation does not apply or cure statuses.</p></aside>
+      </section>
+
+      <section id="progression" aria-labelledby="progression-title">
+        <div class="section-heading"><span>05</span><h2 id="progression-title">Gear, gold &amp; magic</h2></div>
+        <p>Winning a battle grants XP and gold from its enemies, plus a chance of consumable drops. Story boss victories also grant quest rewards and route unlocks. XP levels Ari up, raising maximum HP, maximum MP, Attack, Defense, and Magic; Speed rises on even levels. Status shows the current stats and XP toward the next level.</p>
+        <div class="two-column">
+          <div><h3>Equip your upgrades</h3><p>Ari has a weapon, helmet, body armor, leg armor, shield, and two accessory slots. Open Menu → Equipment, select an owned item, and confirm. Gear modifies the listed stats; some heavy pieces lower Speed. There is no crafting or upgrade system in this build.</p><p>Buying gear only auto-equips an empty default slot. Replace starter equipment manually. Accessory selection fills the first accessory slot if empty, otherwise the second; the menu has no explicit slot picker or Unequip command.</p></div>
+          <div><h3>Spend and recover</h3><p>Shops buy and sell items for gold. Sell values are 45% of purchase price, rounded down. Key items cannot be sold. An item currently equipped cannot be sold; replace it with another owned item first.</p><p>Inn stays fully restore HP and MP and save a checkpoint. Prices are Greenhollow 8g, Waymeet 18g, Lumaire 28g, Ironmarch 42g, and Sunspire 64g. Confirm with the innkeeper; the stay takes you to the room. Interacting with its bed also heals and saves.</p></div>
+        </div>
+        <table>
+          <caption>Recovery items</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col">Actual effect</th><th scope="col">Base price</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Small Potion</th><td>Restore 24 HP</td><td>12g</td></tr>
+            <tr><th scope="row">Potion</th><td>Restore 60 HP</td><td>32g</td></tr>
+            <tr><th scope="row">Ether</th><td>Restore 18 MP</td><td>44g</td></tr>
+            <tr><th scope="row">Revive Charm</th><td>Restore 80 HP; no resurrection</td><td>140g</td></tr>
+            <tr><th scope="row">Antidote</th><td>No active cure effect in this simulation</td><td>18g</td></tr>
+          </tbody>
+        </table>
+        <p>Recovery is capped at your maximum HP or MP. Items work in battle and in Menu → Items. Only healing spells work in Menu → Magic; damage spells are battle-only.</p>
+        <table>
+          <caption>All six implemented spells</caption>
+          <thead><tr><th scope="col">Spell / MP</th><th scope="col">Effect</th><th scope="col">How to learn</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Spark · 4</th><td>Damage; power 13</td><td>Known at start</td></tr>
+            <tr><th scope="row">Mend · 5</th><td>Heal 28 + Ari’s Magic HP</td><td>Known at start</td></tr>
+            <tr><th scope="row">Ember · 7</th><td>Damage; power 22</td><td>First conversation with Oracle Niva, or Lumaire shop (126g)</td></tr>
+            <tr><th scope="row">River Mend · 9</th><td>Heal 52 + Ari’s Magic HP</td><td>Mire Warden quest reward, or Lumaire shop (162g)</td></tr>
+            <tr><th scope="row">Frost Rune · 10</th><td>Damage; power 34</td><td>Lumaire shop (180g)</td></tr>
+            <tr><th scope="row">Sunflare · 16</th><td>Damage; power 58</td><td>Sunspire market (288g)</td></tr>
+          </tbody>
+        </table>
+        <p class="small">Spell power is not fixed damage. Damage spells add Ari’s Magic and spell power, subtract 45% of the target’s Defense rounded down, then apply a small random addition. Learning a spell is permanent in the current progress state; avoid buying an already known spell, since the shop still charges gold.</p>
+      </section>
+
+      <section id="five-roads" aria-labelledby="five-roads-title">
+        <div class="section-heading"><span>06</span><h2 id="five-roads-title">The Five Roads</h2></div>
+        <p>The campaign follows Greenhollow → Waymeet → Lumaire → Ironmarch → Sunspire → Eclipse Tower. Open the route notes below for objectives, boss destinations, and rewards. These notes contain progression spoilers.</p>
+        <div class="route-notes">
+          <details><summary><span class="route-number">1</span> Greenhollow &amp; Mossvale Cave</summary><div class="details-body"><p>Speak to Elder Rowan, open the Cave Relic chest in Mossvale Relic Grotto, then return to Rowan. He grants 70g and an Iron Sword and opens the Waymeet route. Mossvale has three rooms and no story boss.</p><p><strong>Treasure branch:</strong> Leather Cap in Glowcap Split. <strong>Next road conversation:</strong> Wounded Courier.</p></div></details>
+          <details><summary><span class="route-number">2</span> Waymeet &amp; Dustbridge Ruins</summary><div class="details-body"><p>Speak to Broker Sel. Travel through Dustbridge Ruins and Ledger Hall to the Map Room; defeat Bandit Captain Rusk. Victory grants the Road Seal, completes Road Trouble, adds its 120g quest reward to battle rewards, and opens Lumaire automatically.</p><p><strong>Treasure branch:</strong> Copper Ring in the Broken Loop. <strong>Next road conversation:</strong> Stranded Ferryman.</p></div></details>
+          <details><summary><span class="route-number">3</span> Lumaire &amp; the Flooded Shrine</summary><div class="details-body"><p>Speak to Oracle Niva to start the shrine quest and learn Ember. Travel through the Flooded Shrine and Reed Maze to the Lumen Sanctum; defeat the Mire Warden. Victory grants the Shrine Lumen, a 180g quest reward, River Mend, and access to Ironmarch.</p><p><strong>Treasure branch:</strong> River Charm in the Sluice Chapel. <strong>Next road conversation:</strong> Ash-Covered Miner.</p></div></details>
+          <details><summary><span class="route-number">4</span> Ironmarch &amp; Ironvein Fortress</summary><div class="details-body"><p>Speak to Marshal Brinn. Travel through Ironvein Fortress and its Barracks to the Castellan Chamber; defeat the Iron Castellan. Victory grants the Iron Writ, a 240g quest reward, and access to Sunspire.</p><p><strong>Treasure branch:</strong> Ember Amulet in the Forge Core. <strong>Next road conversation:</strong> Bell Runner.</p></div></details>
+          <details><summary><span class="route-number">5</span> Sunspire &amp; Eclipse Tower</summary><div class="details-body"><p>Speak to Keeper Aster for the Eclipse Key and the final route unlock. Meet Aster’s Page on the road. Travel through Eclipse Tower and its Library to the Observatory; defeat the Hollow Regent to reach the ending.</p><p><strong>Treasure branch:</strong> Sunward Aegis in the Shadow Stair. The ending offers <strong>Continue Exploring</strong>, which keeps your progress, and <strong>Start Over</strong>, which creates a new journey and replaces the saved slot. Start Over is different from the checkpoint restart in Pause.</p></div></details>
+        </div>
+        <p class="tip"><strong>No extra hand-in after the middle bosses:</strong> the Rusk, Mire Warden, and Iron Castellan victories complete their quests and unlock the next roads immediately. Their quest gold is separate from enemy gold. Road NPC conversations guide the objective list but do not gate those unlocks.</p>
+      </section>
+
+      <section id="saves" aria-labelledby="saves-title">
+        <div class="section-heading"><span>07</span><h2 id="saves-title">Saves &amp; defeat</h2></div>
+        <p>There is one local checkpoint slot, with no account or cloud sync. Menu → Save, a confirmed Save Crystal interaction, an inn stay, and sleeping in an inn bed all replace it. A checkpoint stores your position, stats, inventory, equipment, spells, quest progress, and map progress. Walking, winning a fight, or completing a quest does not itself save.</p>
+        <aside class="note"><h3>A valid save resumes automatically</h3><p>Startup resumes a valid existing version-one save without rewriting its stored bytes. It creates a persistent starting checkpoint only when it can confirm the slot is empty. Malformed, unsupported, or unreadable saved data is retained; load errors do not silently replace it. An explicit Save, crystal save, rest/sleep save, or ending Start Over can still replace the slot.</p></aside>
+        <div class="two-column">
+          <div><h3>Loading and defeat</h3><p>Menu → Load reads the local slot and replaces your current progress with it. After defeat, confirm to restore the last in-memory checkpoint. You lose changes made after that checkpoint, including newly earned XP, gold, items, and quest progress. There is no separate gold penalty.</p></div>
+          <div><h3>Storage and scope</h3><p>If browser storage is blocked, the game still keeps an in-memory checkpoint, but it cannot persist it. The save message does not distinguish a blocked storage write. Saves belong to the browser’s site storage; there is no export/import, multiple slots, or cross-device transfer UI.</p></div>
+        </div>
+        <p><strong>Restart checkpoint and Exit preserve the saved slot.</strong> A confirmed checkpoint restart restores the in-memory checkpoint; Exit leaves the current session available through Return to game. Neither saves your recent changes. Closing or reloading resumes the last valid persisted save, so use Menu → Save first if you want to keep more recent progress.</p>
+        <p class="tip"><strong>The wiki never touches your save.</strong> It has no scripts or browser-storage access. After continuing past the ending, use Menu → Save if you want a checkpoint of that progress.</p>
+      </section>
+
+      <section id="limits" aria-labelledby="limits-title">
+        <div class="section-heading"><span>08</span><h2 id="limits-title">Settings &amp; current limits</h2></div>
+        <ul class="plain-list">
+          <li><strong>One campaign.</strong> The available play is the Five Roads story and continued exploration after its ending. There is no multiplayer, alternate campaign, score mode, or difficulty selector.</li>
+          <li><strong>Options is a control reference.</strong> It does not offer volume sliders, key rebinding, graphics presets, or gameplay settings.</li>
+          <li><strong>Combat has a limited ruleset.</strong> Spell elements currently label visuals, with no resistance system. Status effects are not applied or cured. Enemies use their first defined action; weighted alternate boss moves are not selected.</li>
+          <li><strong>Enemy reappearance.</strong> Ordinary visible enemies return when their map reloads. Defeated story bosses stay removed in the saved progress state. Random encounter zones still produce battles.</li>
+          <li><strong>Development tools are separate.</strong> F9 grants playtest stats and F10 grants stats plus route unlocks only in a development build. They are not available in the published production build.</li>
+          <li><strong>Planned work is not a player feature.</strong> Developer goals include further art and polish; the goal document is not a guarantee of implemented mechanics. This guide does not claim completion of those goals.</li>
+          <li><strong>Mobile testing has limits.</strong> The runtime owner's short Chromium phone-emulation checks covered touch gameplay, portrait/landscape, and save preservation. Physical phones, mobile Safari/WebKit, real cutouts/browser chrome, and sustained performance remain unverified.</li>
+        </ul>
+      </section>
+
+      <section id="sources" aria-labelledby="sources-title">
+        <div class="section-heading"><span>09</span><h2 id="sources-title">About this edition</h2></div>
+        <p>Reviewed on <time datetime="2026-09-30">30 September 2026</time> against <a href="https://github.com/Pazneria/sword-guys/tree/bc97b4f32a81edf3a694556b3e5de3bdfdf10958">mobile/save source revision <code>bc97b4f</code></a>, based on <code>81bcfe2</code>. This guide describes their combined integration; an older published game may differ until that integration is deployed.</p>
+        <p>Rules come from <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/game/simulation/engine.ts">the simulation</a>, <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/game/content.ts">content definitions</a>, <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/game/input/touch.ts">touch input</a>, <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/ui/dom.ts">menu and battle UI</a>, <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/ui/session.ts">session controls and startup</a>, and <a href="https://github.com/Pazneria/sword-guys/blob/bc97b4f32a81edf3a694556b3e5de3bdfdf10958/src/game/saveValidation.ts">save validation</a>. Source inspection and the runtime owner's test handoff establish these controls and save rules; this wiki's short browser checks verify guide layout and navigation.</p>
+        <p class="small">The startup save overwrite found in the earlier <code>81bcfe2</code> snapshot is fixed in this mobile/save revision. Other previously documented combat limits remain unchanged. Recheck the relevant source and update this revision note when rules change; no full campaign or physical-phone Safari playthrough is claimed.</p>
+      </section>
+      <footer><span>Sword Guys · Player guide</span><a href="#top">Back to top ↑</a></footer>
+    </main>
+  </div>
+</body>
+</html>

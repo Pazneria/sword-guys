@@ -1,6 +1,7 @@
 import { ITEMS, MAPS, SPELLS, TILE_DEFINITIONS } from '../game/content';
 import { itemIconUrlForId } from '../game/items/icons';
 import { GameEngine } from '../game/simulation/engine';
+import { loadSavedGameSafely } from '../game/saveValidation';
 import { BattleState, InputActionState, InteractionResult, TILE_SIZE, TileLayerName } from '../game/types';
 
 type Overlay = 'none' | 'dialogue' | 'menu' | 'shop' | 'inn' | 'bedRest' | 'savePoint' | 'map' | 'battle' | 'ending';
@@ -36,6 +37,7 @@ export class UIManager {
   private endingIndex = 0;
   private endingClickAction: 'continue' | 'restart' | null = null;
   private lastHtml = '';
+  private pendingTap: { kind: string; index: number; overlay: Overlay; mode: BattleMode } | null = null;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -43,6 +45,8 @@ export class UIManager {
       const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-ending-action]') : null;
       const action = target?.dataset.endingAction;
       if (action === 'continue' || action === 'restart') this.endingClickAction = action;
+      const choice = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-ui-choice]') : null;
+      if (choice) this.pendingTap = { kind: choice.dataset.uiChoice!, index: Number(choice.dataset.index ?? 0), overlay: this.overlay, mode: this.battleMode };
     });
   }
 
@@ -107,9 +111,37 @@ export class UIManager {
   close() {
     this.overlay = 'none';
     this.notice = '';
+    this.clearPendingActions();
+  }
+
+  clearPendingActions() {
+    this.pendingTap = null;
+    this.endingClickAction = null;
+  }
+
+  private applyTap(actions: InputActionState) {
+    const tap = this.pendingTap;
+    this.pendingTap = null;
+    if (!tap || tap.overlay !== this.overlay || (this.overlay === 'battle' && tap.mode !== this.battleMode)) return actions;
+    const input = { ...actions };
+    if (tap.kind === 'tab') { this.menuTab = tap.index; this.menuIndex = 0; }
+    if (tap.kind === 'menu-row') { this.menuIndex = tap.index; input.confirmPressed = true; }
+    if (tap.kind === 'shop-mode') { this.shopMode = tap.index === 0 ? 'buy' : 'sell'; this.shopIndex = 0; }
+    if (tap.kind === 'shop-row') { this.shopIndex = tap.index; input.confirmPressed = true; }
+    if (tap.kind === 'battle-command') { this.battleIndex = tap.index; input.confirmPressed = true; }
+    if (tap.kind === 'battle-option') { this.battleSubIndex = tap.index; input.confirmPressed = true; }
+    if (tap.kind === 'battle-target') { this.battleTargetIndex = tap.index; input.confirmPressed = true; }
+    if (tap.kind === 'confirm') input.confirmPressed = true;
+    if (tap.kind === 'cancel') input.cancelPressed = true;
+    return input;
   }
 
   handleExplorationActions(actions: InputActionState, engine: GameEngine) {
+    actions = this.applyTap(actions);
+    if (this.overlay !== 'none' && this.overlay !== 'ending' && actions.menuPressed) {
+      this.close();
+      return true;
+    }
     if (this.overlay === 'none') {
       if (actions.mapPressed) {
         this.openMap();
@@ -133,6 +165,7 @@ export class UIManager {
   }
 
   handleBattleActions(actions: InputActionState, engine: GameEngine): 'world' | 'stay' {
+    actions = this.applyTap(actions);
     const battle = engine.currentBattle;
     if (!battle) {
       if (this.overlay === 'battle') this.close();
@@ -234,6 +267,9 @@ export class UIManager {
   }
 
   sync(engine: GameEngine) {
+    if (this.root.dataset) this.root.dataset.overlay = this.overlay;
+    const touchRoot = this.root.ownerDocument?.getElementById('touch-controls');
+    touchRoot?.querySelectorAll<HTMLButtonElement>('.touch-toolbar button').forEach((button) => { button.disabled = this.overlay === 'battle'; });
     if (this.overlay === 'ending' && this.endingClickAction) {
       this.activateEndingChoice(this.endingClickAction, engine);
       this.endingClickAction = null;
@@ -279,7 +315,7 @@ export class UIManager {
     if (tab === 'Equipment' && selected) this.notice = engine.equip(selected);
     if (tab === 'Magic' && selected) this.notice = this.fieldCast(engine, selected);
     if (tab === 'Save') this.notice = engine.createCheckpoint('Saved from menu.');
-    if (tab === 'Load') this.notice = engine.loadSavedGame();
+    if (tab === 'Load') this.notice = loadSavedGameSafely(engine);
     if (tab === 'Close') this.close();
   }
 
@@ -590,7 +626,8 @@ export class UIManager {
 
   private renderHud(engine: GameEngine) {
     return `
-      ${engine.prompt() && this.overlay === 'none' ? `<div class="prompt">E ${esc(engine.prompt())}</div>` : ''}
+      ${this.overlay === 'none' ? `<div class="mobile-status"><span>Ari Lv ${esc(engine.state.player.level)} · HP ${esc(engine.state.player.stats.hp)}/${esc(engine.state.player.stats.maxHp)} · MP ${esc(engine.state.player.stats.mp)}/${esc(engine.state.player.stats.maxMp)} · ${esc(engine.state.player.gold)}g</span><small>${esc(this.questTarget(engine).label)}</small></div>` : ''}
+      ${engine.prompt() && this.overlay === 'none' ? `<div class="prompt"><span class="keyboard-hint">E</span><span class="touch-hint">OK</span> ${esc(engine.prompt())}</div>` : ''}
       ${engine.message ? `<div class="toast">${esc(engine.message)}</div>` : ''}
       ${engine.debug ? `<div class="debug-chip">F3 debug: collision / transitions / regions / aggro</div>` : ''}
     `;
@@ -614,7 +651,7 @@ export class UIManager {
       <div class="dialogue">
         <div class="speaker">${esc(this.dialogue.speaker)}</div>
         <div class="dialogue-text">${esc(this.dialogue.lines[this.dialogue.index] ?? '')}</div>
-        <div class="advance">E / Enter</div>
+        <div class="advance"><button type="button" data-ui-choice="confirm">Next / OK</button><button type="button" data-ui-choice="cancel">Close</button></div>
       </div>
     `;
   }
@@ -625,19 +662,20 @@ export class UIManager {
   }
 
   private renderOptionRow(option: UiOption, index: number, selected: boolean, className: 'line' | 'shop-row' = 'line') {
+    const choice = className === 'shop-row' ? 'shop-row' : 'menu-row';
     return `
-      <div class="${className} ${selected ? 'selected' : ''}">
+      <button type="button" data-ui-choice="${choice}" data-index="${index}" class="${className} ${selected ? 'selected' : ''}">
         <span class="option-main">${this.itemIconHtml(option.iconId)}<span class="option-label">${esc(option.label)}</span></span>
         <span class="muted option-meta">${esc(option.meta)}</span>
-      </div>
+      </button>
     `;
   }
 
-  private renderBattleOption(iconId: string | undefined, label: string, selected: boolean) {
+  private renderBattleOption(iconId: string | undefined, label: string, selected: boolean, index: number) {
     return `
-      <div class="command ${selected ? 'selected' : ''}">
+      <button type="button" data-ui-choice="battle-option" data-index="${index}" class="command ${selected ? 'selected' : ''}">
         <span class="option-main">${this.itemIconHtml(iconId)}<span class="option-label">${esc(label)}</span></span>
-      </div>
+      </button>
     `;
   }
 
@@ -677,6 +715,8 @@ export class UIManager {
           ? this.renderMapContent(engine, 'panel')
         : tab === 'Options'
           ? [
+              `<div class="line">Touch <span>Hold arrows to move. Tap choices or OK. Back cancels.</span></div>`,
+              `<div class="line">Pause <span>Pause button / P</span></div>`,
               `<div class="line">Move <span>WASD / Arrows</span></div>`,
               `<div class="line">Confirm <span>E / Enter / Space</span></div>`,
               `<div class="line">Menu <span>M / Tab</span></div>`,
@@ -686,7 +726,7 @@ export class UIManager {
               import.meta.env.DEV ? `<div class="line">Unlock routes <span>F10</span></div>` : ''
             ].join('')
           : tab === 'Save' || tab === 'Load' || tab === 'Close'
-            ? `<div class="line selected">${tab === 'Save' ? 'Save current checkpoint' : tab === 'Load' ? 'Load local save slot' : 'Return to game'}</div>`
+            ? `<button type="button" data-ui-choice="confirm" class="line selected">${tab === 'Save' ? 'Save current checkpoint' : tab === 'Load' ? 'Load local save slot' : 'Return to game'}</button>`
             : options.length
               ? options
                   .map((option, index) => this.renderOptionRow(option, index, index === this.menuIndex))
@@ -694,12 +734,13 @@ export class UIManager {
               : empty;
     return `
       <div class="panel">
-        <div class="tabs">${tabs.map((name, index) => `<div class="tab ${index === this.menuTab ? 'selected' : ''}">${esc(name)}</div>`).join('')}</div>
+        <div class="tabs">${tabs.map((name, index) => `<button type="button" data-ui-choice="tab" data-index="${index}" class="tab ${index === this.menuTab ? 'selected' : ''}">${esc(name)}</button>`).join('')}</div>
         <div class="panel-body">
           <div class="panel-title">${esc(tab)}</div>
           <div class="content-list">${content}</div>
           ${this.notice ? `<p class="good">${esc(this.notice)}</p>` : ''}
           <p class="muted">Left/right tabs. Up/down select. Confirm acts. Cancel closes.</p>
+          <button type="button" data-ui-choice="cancel" class="overlay-close">Close menu</button>
         </div>
       </div>
     `;
@@ -712,7 +753,7 @@ export class UIManager {
       <div class="panel">
         <div class="tabs">
           <div class="panel-title">${esc(shop?.name ?? 'Shop')}</div>
-          <div class="shop-toggle"><span class="${this.shopMode === 'buy' ? 'selected' : ''}">Buy</span><span class="${this.shopMode === 'sell' ? 'selected' : ''}">Sell</span></div>
+          <div class="shop-toggle"><button type="button" data-ui-choice="shop-mode" data-index="0" class="${this.shopMode === 'buy' ? 'selected' : ''}">Buy</button><button type="button" data-ui-choice="shop-mode" data-index="1" class="${this.shopMode === 'sell' ? 'selected' : ''}">Sell</button></div>
           <div class="muted">Gold: ${engine.state.player.gold}g</div>
         </div>
         <div class="panel-body">
@@ -725,6 +766,7 @@ export class UIManager {
           </div>
           ${this.notice ? `<p class="good">${esc(this.notice)}</p>` : ''}
           <p class="muted">Left/right toggles buy/sell. Cancel exits.</p>
+          <button type="button" data-ui-choice="cancel" class="overlay-close">Leave shop</button>
         </div>
       </div>
     `;
@@ -735,7 +777,7 @@ export class UIManager {
       <div class="dialogue">
         <div class="speaker">${esc(title)}</div>
         <div class="dialogue-text">${esc(text)}</div>
-        <div class="advance">Confirm / Cancel</div>
+        <div class="advance"><button type="button" data-ui-choice="confirm">Confirm</button><button type="button" data-ui-choice="cancel">Cancel</button></div>
       </div>
     `;
   }
@@ -744,7 +786,7 @@ export class UIManager {
     return `
       <div class="map-overlay">
         ${this.renderMapContent(engine, 'overlay')}
-        <div class="advance">N / Confirm / Cancel</div>
+        <div class="advance"><button type="button" data-ui-choice="cancel">Close map</button></div>
       </div>
     `;
   }
@@ -757,15 +799,15 @@ export class UIManager {
       this.battleMode === 'targets'
         ? targets.length
           ? targets
-              .map((enemy, index) => `<div class="command target-command ${index === this.battleTargetIndex ? 'selected' : ''}"><span>${esc(enemy.name)}</span><span class="muted">${Math.max(0, enemy.stats.hp)}/${enemy.stats.maxHp}</span></div>`)
+              .map((enemy, index) => `<button type="button" data-ui-choice="battle-target" data-index="${index}" class="command target-command ${index === this.battleTargetIndex ? 'selected' : ''}"><span>${esc(enemy.name)}</span><span class="muted">${Math.max(0, enemy.stats.hp)}/${enemy.stats.maxHp}</span></button>`)
               .join('')
           : '<div class="command muted">No targets</div>'
       : this.battleMode === 'commands'
-        ? commands.map((command, index) => `<div class="command ${index === this.battleIndex ? 'selected' : ''}">${command}</div>`).join('')
+        ? commands.map((command, index) => `<button type="button" data-ui-choice="battle-command" data-index="${index}" ${index === 4 && !battle.escapeAllowed ? 'disabled' : ''} class="command ${index === this.battleIndex ? 'selected' : ''}">${command}</button>`).join('')
         : options
             .map((id, index) => {
               const label = this.battleMode === 'magic' ? `${SPELLS[id].name} (${SPELLS[id].mpCost} MP)` : `${ITEMS[id].name} x${engine.state.inventory[id]}`;
-              return this.renderBattleOption(id, label, index === this.battleSubIndex);
+              return this.renderBattleOption(id, label, index === this.battleSubIndex, index);
             })
             .join('');
     const enemyLine = battle.enemies.map((enemy) => `${enemy.name} ${Math.max(0, enemy.stats.hp)}/${enemy.stats.maxHp}`).join(' | ');
@@ -782,11 +824,12 @@ export class UIManager {
           <div>Ari HP ${battle.player.stats.hp}/${battle.player.stats.maxHp} MP ${battle.player.stats.mp}/${battle.player.stats.maxMp}</div>
           <div class="battle-log">${battle.commandLog.slice(-5).map((line) => `<div>${esc(line)}</div>`).join('')}</div>
           ${this.renderBattleRewardItems(battle)}
-          ${battle.phase === 'victory' || battle.phase === 'escaped' || battle.phase === 'defeat' ? '<p class="good">Confirm to continue.</p>' : ''}
+          ${battle.phase === 'victory' || battle.phase === 'escaped' || battle.phase === 'defeat' ? '<button type="button" data-ui-choice="confirm" class="good">Continue / OK</button>' : ''}
         </div>
         <div>
           <div class="battle-title">${esc(commandTitle)}</div>
           <div class="commands ${this.battleMode === 'targets' ? 'target-list' : ''}">${right || '<div class="command muted">None</div>'}</div>
+          ${this.battleMode !== 'commands' ? '<button type="button" data-ui-choice="cancel" class="overlay-close">Back</button>' : ''}
         </div>
       </div>
     `;

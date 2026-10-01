@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { InputActionState } from '../types';
+import { touchActions } from './touch';
 
 export interface ActionKeys {
   up: Phaser.Input.Keyboard.Key[];
@@ -20,41 +21,38 @@ const justDown = (keys: Phaser.Input.Keyboard.Key[]) => keys.some((key) => Phase
 
 export const createActionKeys = (scene: Phaser.Scene): ActionKeys => {
   const keyboard = scene.input.keyboard;
-  if (!keyboard) throw new Error('Keyboard input is not available.');
   const code = Phaser.Input.Keyboard.KeyCodes;
+  const add = (...codes: number[]) => keyboard ? codes.map((value) => keyboard.addKey(value)) : [];
+  touchActions.reset();
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => touchActions.reset());
   return {
-    up: [keyboard.addKey(code.W), keyboard.addKey(code.UP)],
-    down: [keyboard.addKey(code.S), keyboard.addKey(code.DOWN)],
-    left: [keyboard.addKey(code.A), keyboard.addKey(code.LEFT)],
-    right: [keyboard.addKey(code.D), keyboard.addKey(code.RIGHT)],
-    confirm: [keyboard.addKey(code.E), keyboard.addKey(code.ENTER), keyboard.addKey(code.SPACE)],
-    cancel: [keyboard.addKey(code.ESC), keyboard.addKey(code.BACKSPACE)],
-    menu: [keyboard.addKey(code.M), keyboard.addKey(code.TAB)],
-    map: [keyboard.addKey(code.N)],
-    debug: [keyboard.addKey(code.F3)],
-    playtestPower: [keyboard.addKey(code.F9)],
-    playtestRoutes: [keyboard.addKey(code.F10)]
+    up: add(code.W, code.UP), down: add(code.S, code.DOWN),
+    left: add(code.A, code.LEFT), right: add(code.D, code.RIGHT),
+    confirm: add(code.E, code.ENTER, code.SPACE), cancel: add(code.ESC, code.BACKSPACE),
+    menu: add(code.M, code.TAB), map: add(code.N), debug: add(code.F3),
+    playtestPower: add(code.F9), playtestRoutes: add(code.F10)
   };
 };
 
 export const readActions = (keys: ActionKeys): InputActionState => {
-  const left = isDown(keys.left);
-  const right = isDown(keys.right);
-  const up = isDown(keys.up);
-  const down = isDown(keys.down);
+  const touch = touchActions.read();
+  const left = isDown(keys.left) || touch.moveX < 0;
+  const right = isDown(keys.right) || touch.moveX > 0;
+  const up = isDown(keys.up) || touch.moveY < 0;
+  const down = isDown(keys.down) || touch.moveY > 0;
   return {
     moveX: (right ? 1 : 0) - (left ? 1 : 0),
     moveY: (down ? 1 : 0) - (up ? 1 : 0),
-    confirmPressed: justDown(keys.confirm),
-    cancelPressed: justDown(keys.cancel),
-    menuPressed: justDown(keys.menu),
-    mapPressed: justDown(keys.map),
+    confirmPressed: justDown(keys.confirm) || touch.confirmPressed,
+    cancelPressed: justDown(keys.cancel) || touch.cancelPressed,
+    menuPressed: justDown(keys.menu) || touch.menuPressed,
+    mapPressed: justDown(keys.map) || touch.mapPressed,
     debugPressed: justDown(keys.debug),
     playtestPowerPressed: justDown(keys.playtestPower),
     playtestRoutesPressed: justDown(keys.playtestRoutes),
-    upPressed: justDown(keys.up),
-    downPressed: justDown(keys.down),
-    leftPressed: justDown(keys.left),
-    rightPressed: justDown(keys.right)
+    upPressed: justDown(keys.up) || touch.upPressed,
+    downPressed: justDown(keys.down) || touch.downPressed,
+    leftPressed: justDown(keys.left) || touch.leftPressed,
+    rightPressed: justDown(keys.right) || touch.rightPressed
   };
 };
